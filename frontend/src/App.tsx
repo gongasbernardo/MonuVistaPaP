@@ -9,6 +9,7 @@ import Album from './pages/Album';
 import Community from './pages/Community';
 import VisitPlace from './pages/VisitPlace';
 import Groups from './pages/Groups';
+import authService from './services/authService';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -28,6 +29,16 @@ import '@ionic/react/css/display.css';
 
 setupIonicReact();
 
+const ProtectedRoute: React.FC<{ path: string; exact?: boolean; children: React.ReactNode }> = ({
+  path,
+  exact,
+  children,
+}) => (
+  <Route exact={exact} path={path}>
+    {authService.isAuthenticated() ? children : <Redirect to="/login" />}
+  </Route>
+);
+
 const App: React.FC = () => (
   <IonApp>
     <IonReactRouter>
@@ -38,24 +49,24 @@ const App: React.FC = () => (
         <Route exact path="/register">
           <Register />
         </Route>
-        <Route exact path="/home">
+        <ProtectedRoute exact path="/home">
           <Home />
-        </Route>
-        <Route exact path="/create-post">
+        </ProtectedRoute>
+        <ProtectedRoute exact path="/create-post">
           <CreatePost />
-        </Route>
-        <Route exact path="/album">
+        </ProtectedRoute>
+        <ProtectedRoute exact path="/album">
           <Album />
-        </Route>
-        <Route exact path="/community">
+        </ProtectedRoute>
+        <ProtectedRoute exact path="/community">
           <Community />
-        </Route>
-        <Route exact path="/groups">
+        </ProtectedRoute>
+        <ProtectedRoute exact path="/groups">
           <Groups />
-        </Route>
-        <Route exact path="/visit">
+        </ProtectedRoute>
+        <ProtectedRoute exact path="/visit">
           <VisitPlace />
-        </Route>
+        </ProtectedRoute>
         <Route exact path="/">
           <Redirect to="/login" />
         </Route>

@@ -1,16 +1,14 @@
-// Album Service - Gestão de monumentos visitados e por visitar
+// Album Service - Real API-backed album management
+import axios from 'axios';
+import { API_URL } from '../config';
 
 export interface VisitInfo {
   visited: boolean;
-  date?: string; // ISO string
-  year?: number;
-  month?: number;
-  day?: number;
-  hour?: number;
-  minute?: number;
+  date?: string;
 }
 
 export interface AlbumMonument {
+  _id: string;
   id: string;
   name: string;
   location: string;
@@ -21,224 +19,152 @@ export interface AlbumMonument {
   description: string;
   history: string;
   funFacts: string[];
-  image: string; // base64 da foto tirada pelo usuário
-  folderId: string; // ID da pasta onde está organizado
+  image: string;
+  folderId: any;
+  userId: string;
+  visited: boolean;
+  visitDate: string | null;
   visitInfo: VisitInfo;
-  addedAt: string; // ISO string
+  createdAt: string;
+  addedAt: string;
 }
 
 export interface Folder {
+  _id: string;
   id: string;
   name: string;
   color: string;
+  isDefault: boolean;
   createdAt: string;
 }
 
-const STORAGE_KEY = 'monuvista_album';
-const FOLDERS_KEY = 'monuvista_folders';
+function getHeaders() {
+  const token = localStorage.getItem('token');
+  return { Authorization: `Bearer ${token}` };
+}
+
+function mapMonument(m: any): AlbumMonument {
+  return {
+    ...m,
+    id: m._id,
+    addedAt: m.createdAt,
+    visitInfo: {
+      visited: m.visited,
+      date: m.visitDate || undefined,
+    },
+  };
+}
+
+function mapFolder(f: any): Folder {
+  return { ...f, id: f._id };
+}
 
 class AlbumService {
   // ========== FOLDERS ==========
-  
-  getFolders(): Folder[] {
-    const stored = localStorage.getItem(FOLDERS_KEY);
-    if (!stored) {
-      // Criar pastas padrão
-      const defaultFolders: Folder[] = [
-        {
-          id: 'default',
-          name: 'Sem Categoria',
-          color: '#6B7280',
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: 'medieval',
-          name: 'Medieval',
-          color: '#8B5CF6',
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: 'renaissance',
-          name: 'Renascença',
-          color: '#F59E0B',
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: 'baroque',
-          name: 'Barroco',
-          color: '#EC4899',
-          createdAt: new Date().toISOString(),
-        },
-      ];
-      localStorage.setItem(FOLDERS_KEY, JSON.stringify(defaultFolders));
-      return defaultFolders;
-    }
-    return JSON.parse(stored);
+
+  async getFolders(): Promise<Folder[]> {
+    const res = await axios.get(`${API_URL}/api/album/folders`, { headers: getHeaders() });
+    return (res.data.data || []).map(mapFolder);
   }
 
-  createFolder(name: string, color: string): Folder {
-    const folders = this.getFolders();
-    const newFolder: Folder = {
-      id: Date.now().toString(),
-      name,
-      color,
-      createdAt: new Date().toISOString(),
-    };
-    folders.push(newFolder);
-    localStorage.setItem(FOLDERS_KEY, JSON.stringify(folders));
-    return newFolder;
+  async createFolder(name: string, color: string): Promise<Folder> {
+    const res = await axios.post(`${API_URL}/api/album/folders`, { name, color }, { headers: getHeaders() });
+    return mapFolder(res.data.data);
   }
 
-  deleteFolder(folderId: string): void {
-    if (folderId === 'default') {
-      throw new Error('Não pode eliminar a pasta padrão');
-    }
-    
-    const folders = this.getFolders().filter(f => f.id !== folderId);
-    localStorage.setItem(FOLDERS_KEY, JSON.stringify(folders));
-    
-    // Mover monumentos para pasta padrão
-    const monuments = this.getMonuments();
-    monuments.forEach(m => {
-      if (m.folderId === folderId) {
-        m.folderId = 'default';
-      }
-    });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(monuments));
+  async deleteFolder(folderId: string): Promise<void> {
+    await axios.delete(`${API_URL}/api/album/folders/${folderId}`, { headers: getHeaders() });
   }
 
-  updateFolder(folderId: string, name: string, color: string): void {
-    const folders = this.getFolders();
-    const folder = folders.find(f => f.id === folderId);
-    if (folder) {
-      folder.name = name;
-      folder.color = color;
-      localStorage.setItem(FOLDERS_KEY, JSON.stringify(folders));
-    }
+  async updateFolder(folderId: string, name: string, color: string): Promise<void> {
+    await axios.put(`${API_URL}/api/album/folders/${folderId}`, { name, color }, { headers: getHeaders() });
   }
 
   // ========== MONUMENTS ==========
 
-  getMonuments(): AlbumMonument[] {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
+  async getMonuments(): Promise<AlbumMonument[]> {
+    const res = await axios.get(`${API_URL}/api/album/monuments`, { headers: getHeaders() });
+    return (res.data.data || []).map(mapMonument);
   }
 
-  getMonumentById(id: string): AlbumMonument | null {
-    const monuments = this.getMonuments();
-    return monuments.find(m => m.id === id) || null;
+  async getMonumentById(id: string): Promise<AlbumMonument | null> {
+    try {
+      const res = await axios.get(`${API_URL}/api/album/monuments/${id}`, { headers: getHeaders() });
+      return mapMonument(res.data.data);
+    } catch {
+      return null;
+    }
   }
 
-  getMonumentsByFolder(folderId: string): AlbumMonument[] {
-    return this.getMonuments().filter(m => m.folderId === folderId);
+  async getMonumentsByFolder(folderId: string): Promise<AlbumMonument[]> {
+    const res = await axios.get(`${API_URL}/api/album/monuments`, {
+      params: { folderId },
+      headers: getHeaders()
+    });
+    return (res.data.data || []).map(mapMonument);
   }
 
-  getVisitedMonuments(): AlbumMonument[] {
-    return this.getMonuments().filter(m => m.visitInfo.visited);
+  async getVisitedMonuments(): Promise<AlbumMonument[]> {
+    const res = await axios.get(`${API_URL}/api/album/monuments`, {
+      params: { visited: 'true' },
+      headers: getHeaders()
+    });
+    return (res.data.data || []).map(mapMonument);
   }
 
-  getToVisitMonuments(): AlbumMonument[] {
-    return this.getMonuments().filter(m => !m.visitInfo.visited);
+  async getToVisitMonuments(): Promise<AlbumMonument[]> {
+    const res = await axios.get(`${API_URL}/api/album/monuments`, {
+      params: { visited: 'false' },
+      headers: getHeaders()
+    });
+    return (res.data.data || []).map(mapMonument);
   }
 
-  addMonument(
-    monument: Omit<AlbumMonument, 'id' | 'addedAt' | 'visitInfo'>,
+  async addMonument(
+    monument: {
+      name: string; location: string; country: string; region: string;
+      century: string; style: string; description: string; history: string;
+      funFacts: string[]; image: string; folderId: string;
+    },
     visited: boolean = false
-  ): AlbumMonument {
-    const monuments = this.getMonuments();
-    
-    const visitInfo: VisitInfo = {
-      visited,
-    };
-
-    if (visited) {
-      const now = new Date();
-      visitInfo.date = now.toISOString();
-      visitInfo.year = now.getFullYear();
-      visitInfo.month = now.getMonth() + 1;
-      visitInfo.day = now.getDate();
-      visitInfo.hour = now.getHours();
-      visitInfo.minute = now.getMinutes();
-    }
-
-    const newMonument: AlbumMonument = {
+  ): Promise<AlbumMonument> {
+    const res = await axios.post(`${API_URL}/api/album/monuments`, {
       ...monument,
-      id: Date.now().toString(),
-      addedAt: new Date().toISOString(),
-      visitInfo,
-    };
-
-    monuments.push(newMonument);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(monuments));
-    return newMonument;
+      visited,
+    }, { headers: getHeaders() });
+    return mapMonument(res.data.data);
   }
 
-  markAsVisited(monumentId: string): void {
-    const monuments = this.getMonuments();
-    const monument = monuments.find(m => m.id === monumentId);
-    
-    if (monument) {
-      const now = new Date();
-      monument.visitInfo = {
-        visited: true,
-        date: now.toISOString(),
-        year: now.getFullYear(),
-        month: now.getMonth() + 1,
-        day: now.getDate(),
-        hour: now.getHours(),
-        minute: now.getMinutes(),
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(monuments));
-    }
+  async markAsVisited(monumentId: string): Promise<void> {
+    await axios.put(`${API_URL}/api/album/monuments/${monumentId}`, { visited: true }, { headers: getHeaders() });
   }
 
-  markAsToVisit(monumentId: string): void {
-    const monuments = this.getMonuments();
-    const monument = monuments.find(m => m.id === monumentId);
-    
-    if (monument) {
-      monument.visitInfo = {
-        visited: false,
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(monuments));
-    }
+  async markAsToVisit(monumentId: string): Promise<void> {
+    await axios.put(`${API_URL}/api/album/monuments/${monumentId}`, { visited: false }, { headers: getHeaders() });
   }
 
-  moveToFolder(monumentId: string, folderId: string): void {
-    const monuments = this.getMonuments();
-    const monument = monuments.find(m => m.id === monumentId);
-    
-    if (monument) {
-      monument.folderId = folderId;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(monuments));
-    }
+  async moveToFolder(monumentId: string, folderId: string): Promise<void> {
+    await axios.put(`${API_URL}/api/album/monuments/${monumentId}`, { folderId }, { headers: getHeaders() });
   }
 
-  deleteMonument(monumentId: string): void {
-    const monuments = this.getMonuments().filter(m => m.id !== monumentId);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(monuments));
+  async deleteMonument(monumentId: string): Promise<void> {
+    await axios.delete(`${API_URL}/api/album/monuments/${monumentId}`, { headers: getHeaders() });
   }
 
   // ========== STATS ==========
 
-  getStats() {
-    const monuments = this.getMonuments();
-    const visited = monuments.filter(m => m.visitInfo.visited);
-    const toVisit = monuments.filter(m => !m.visitInfo.visited);
-    const countries = new Set(monuments.map(m => m.country));
-    
-    return {
-      total: monuments.length,
-      visited: visited.length,
-      toVisit: toVisit.length,
-      countries: countries.size,
-    };
+  async getStats(): Promise<{ total: number; visited: number; toVisit: number; countries: number }> {
+    const res = await axios.get(`${API_URL}/api/album/stats`, { headers: getHeaders() });
+    return res.data.data;
   }
 
-  // Verifica se monumento já está no álbum
-  isInAlbum(monumentName: string): boolean {
-    const monuments = this.getMonuments();
-    return monuments.some(m => m.name === monumentName);
+  async isInAlbum(monumentName: string): Promise<boolean> {
+    try {
+      const res = await axios.get(`${API_URL}/api/album/check/${encodeURIComponent(monumentName)}`, { headers: getHeaders() });
+      return res.data.inAlbum;
+    } catch {
+      return false;
+    }
   }
 }
 

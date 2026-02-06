@@ -20,6 +20,33 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Name is required'],
     trim: true
   },
+  // User stats / gamification
+  level: {
+    type: Number,
+    default: 1
+  },
+  levelTitle: {
+    type: String,
+    default: 'Iniciante'
+  },
+  xp: {
+    type: Number,
+    default: 0
+  },
+  discoveries: {
+    type: Number,
+    default: 0
+  },
+  badges: [{
+    name: String,
+    description: String,
+    icon: String,
+    earnedAt: { type: Date, default: Date.now }
+  }],
+  joinedChallenges: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Challenge'
+  }],
   notifications: [{
     type: {
       type: String,

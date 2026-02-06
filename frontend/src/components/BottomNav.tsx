@@ -11,8 +11,10 @@ import {
   peopleOutline,
   sparklesOutline,
   chatbubbleOutline,
+  logOutOutline,
 } from "ionicons/icons";
 import { useHistory, useLocation } from "react-router-dom";
+import authService from "../services/authService";
 import "./BottomNav.css";
 
 const BottomNav = () => {
@@ -23,6 +25,11 @@ const BottomNav = () => {
     if (location.pathname !== path) {
       history.push(path);
     }
+  };
+
+  const handleLogout = () => {
+    authService.logout();
+    history.push("/login");
   };
 
   const isActive = (path: string) => location.pathname === path;
@@ -76,6 +83,13 @@ const BottomNav = () => {
       >
         <IonIcon icon={sparklesOutline} />
         <IonLabel>Visitar</IonLabel>
+      </IonTabButton>
+      <IonTabButton
+        tab="logout"
+        onClick={handleLogout}
+      >
+        <IonIcon icon={logOutOutline} />
+        <IonLabel>Sair</IonLabel>
       </IonTabButton>
     </IonTabBar>
   );

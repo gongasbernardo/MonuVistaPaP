@@ -1,4 +1,5 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/database');
@@ -18,6 +19,9 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/posts', require('./routes/posts'));
 app.use('/api/groups', require('./routes/groups'));
+app.use('/api/stats', require('./routes/stats'));
+app.use('/api/challenges', require('./routes/challenges'));
+app.use('/api/album', require('./routes/album'));
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   IonPage,
   IonHeader,
@@ -11,15 +11,24 @@ import {
   IonBackButton,
   IonSegment,
   IonSegmentButton,
+  IonInput,
+  IonButton,
 } from "@ionic/react";
 import {
   peopleOutline,
   locationOutline,
   heartOutline,
+  heartSharp,
   chatbubbleOutline,
   earthOutline,
+  sendOutline,
+  chevronDownOutline,
+  chevronUpOutline,
 } from "ionicons/icons";
 import axios from "axios";
+import { API_URL } from "../config";
+import { COUNTRIES } from "../constants/locations";
+import authService from "../services/authService";
 import BottomNav from "../components/BottomNav";
 import "./Community.css";
 
@@ -37,24 +46,14 @@ interface Post {
   createdAt: string;
 }
 
-const COUNTRIES = [
-  "Portugal",
-  "Espanha",
-  "França",
-  "Itália",
-  "Grécia",
-  "Alemanha",
-  "Reino Unido",
-  "Holanda",
-  "Bélgica",
-  "Polónia",
-];
-
 const Community = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
   const [filterType, setFilterType] = useState<"recent" | "popular">("recent");
   const [selectedCountry, setSelectedCountry] = useState("");
+  const [likedPosts, setLikedPosts] = useState<string[]>([]);
+  const [commentText, setCommentText] = useState<{ [postId: string]: string }>({});
+  const [expandedComments, setExpandedComments] = useState<string[]>([]);
 
   useEffect(() => {
     loadPosts();
@@ -63,10 +62,10 @@ const Community = () => {
   const loadPosts = async () => {
     try {
       setLoading(true);
-      let url = "http://localhost:5000/api/posts";
+      let url = `${API_URL}/api/posts`;
 
       if (selectedCountry) {
-        url = `http://localhost:5000/api/posts/country/${selectedCountry}`;
+        url = `${API_URL}/api/posts/country/${selectedCountry}`;
       }
 
       const response = await axios.get(url, {
@@ -76,7 +75,6 @@ const Community = () => {
       if (response.data.success) {
         let postsData = response.data.data;
 
-        // Sort by filter type
         if (filterType === "popular") {
           postsData = postsData.sort(
             (a: Post, b: Post) => b.likes.length - a.likes.length
@@ -89,11 +87,65 @@ const Community = () => {
         }
 
         setPosts(postsData);
+        // Set liked posts based on current user
+        const userData = authService.getUser();
+        if (userData) {
+          const liked = postsData
+            .filter((p: Post) => p.likes.some((l: any) => l.userId === userData.id))
+            .map((p: Post) => p._id);
+          setLikedPosts(liked);
+        }
       }
     } catch (error) {
       console.error("Erro ao carregar posts:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLikePost = async (postId: string) => {
+    try {
+      const token = authService.getToken();
+      const response = await axios.put(
+        `${API_URL}/api/posts/${postId}/like`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (response.data.success) {
+        if (likedPosts.includes(postId)) {
+          setLikedPosts(likedPosts.filter((id) => id !== postId));
+        } else {
+          setLikedPosts([...likedPosts, postId]);
+        }
+        loadPosts();
+      }
+    } catch (error) {
+      console.error("Erro ao dar like:", error);
+    }
+  };
+
+  const handleAddComment = async (postId: string) => {
+    const text = commentText[postId]?.trim();
+    if (!text) return;
+    try {
+      const token = authService.getToken();
+      await axios.put(
+        `${API_URL}/api/posts/${postId}/comment`,
+        { text },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setCommentText({ ...commentText, [postId]: "" });
+      loadPosts();
+    } catch (error) {
+      console.error("Erro ao comentar:", error);
+    }
+  };
+
+  const toggleComments = (postId: string) => {
+    if (expandedComments.includes(postId)) {
+      setExpandedComments(expandedComments.filter((id) => id !== postId));
+    } else {
+      setExpandedComments([...expandedComments, postId]);
     }
   };
 
@@ -230,15 +282,56 @@ const Community = () => {
                   {post.location}, {post.region}
                 </div>
                 <div className="card-stats">
-                  <span>
-                    <IonIcon icon={heartOutline} />
+                  <button
+                    onClick={() => handleLikePost(post._id)}
+                    className={`action-btn ${likedPosts.includes(post._id) ? "liked" : ""}`}
+                    style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
+                  >
+                    <IonIcon icon={likedPosts.includes(post._id) ? heartSharp : heartOutline} />
                     {post.likes.length}
-                  </span>
-                  <span>
+                  </button>
+                  <button
+                    onClick={() => toggleComments(post._id)}
+                    style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
+                  >
                     <IonIcon icon={chatbubbleOutline} />
                     {post.comments.length}
-                  </span>
+                    <IonIcon
+                      icon={expandedComments.includes(post._id) ? chevronUpOutline : chevronDownOutline}
+                      style={{ fontSize: 12 }}
+                    />
+                  </button>
                 </div>
+
+                {/* Comments section */}
+                {expandedComments.includes(post._id) && (
+                  <div className="comments-section" style={{ marginTop: 8 }}>
+                    {post.comments.length > 0 && (
+                      <div className="comments-list">
+                        {post.comments.map((c: any, idx: number) => (
+                          <div key={idx} className="comment-item" style={{ padding: "4px 0", borderBottom: "1px solid #eee" }}>
+                            <strong style={{ fontSize: 12 }}>{c.userName}</strong>{" "}
+                            <span style={{ fontSize: 12 }}>{c.text}</span>
+                            <small style={{ display: "block", color: "#999", fontSize: 10 }}>{formatDate(c.createdAt)}</small>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 4 }}>
+                      <IonInput
+                        placeholder="Comentar..."
+                        value={commentText[post._id] || ""}
+                        onIonChange={(e) =>
+                          setCommentText({ ...commentText, [post._id]: e.detail.value || "" })
+                        }
+                        style={{ fontSize: 12 }}
+                      />
+                      <IonButton fill="clear" size="small" onClick={() => handleAddComment(post._id)}>
+                        <IonIcon icon={sendOutline} />
+                      </IonButton>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ))}

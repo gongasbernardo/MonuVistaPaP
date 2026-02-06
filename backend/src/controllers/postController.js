@@ -1,6 +1,4 @@
 const Post = require('../models/Post');
-const fs = require('fs');
-const path = require('path');
 
 // @desc    Criar uma nova publicação
 // @route   POST /api/posts

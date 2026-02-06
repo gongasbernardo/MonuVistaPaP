@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { API_URL as BASE_URL } from '../config';
 
-const API_URL = 'http://localhost:5000/api/auth';
+const API_URL = `${BASE_URL}/api/auth`;
 
 export interface LoginData {
   email: string;

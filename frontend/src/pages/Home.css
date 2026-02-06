@@ -823,6 +823,67 @@ ion-segment ion-segment-button:hover {
 }
 
 /* ========================================
+   COMMENTS SECTION
+   ======================================== */
+
+.comments-section {
+  padding: var(--spacing-md);
+  border-top: 1px solid var(--neutral-200);
+  background: var(--neutral-50);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+
+.comments-list {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: var(--spacing-sm);
+}
+
+.comment-item {
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--neutral-100);
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+}
+
+.comment-item strong {
+  color: var(--primary-dark);
+  margin-right: var(--spacing-xs);
+}
+
+.comment-item span {
+  color: var(--neutral-700);
+}
+
+.comment-item small {
+  display: block;
+  color: var(--neutral-400);
+  font-size: var(--font-size-xs);
+  margin-top: 2px;
+}
+
+.comment-input-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.comment-input-row ion-input {
+  --background: var(--neutral-0);
+  --padding-start: var(--spacing-md);
+  --padding-end: var(--spacing-md);
+  border: 1px solid var(--neutral-200);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  min-height: 36px;
+}
+
+.comment-input-row ion-button {
+  --color: var(--primary);
+  min-width: 36px;
+}
+
+/* ========================================
    GROUPS SECTION
    ======================================== */
 

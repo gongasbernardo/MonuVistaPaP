@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   IonPage,
   IonHeader,
@@ -10,6 +10,7 @@ import {
   IonLoading,
   IonSegment,
   IonSegmentButton,
+  IonInput,
 } from "@ionic/react";
 import {
   cameraOutline,
@@ -20,10 +21,15 @@ import {
   heartSharp,
   chatbubbleOutline,
   sparklesOutline,
+  sendOutline,
+  chevronDownOutline,
+  chevronUpOutline,
 } from "ionicons/icons";
 import authService from "../services/authService";
 import { useHistory } from "react-router-dom";
 import axios from "axios";
+import { API_URL } from "../config";
+import { COUNTRIES } from "../constants/locations";
 import BottomNav from "../components/BottomNav";
 import "./Home.css";
 
@@ -41,18 +47,29 @@ interface Post {
   createdAt: string;
 }
 
-const COUNTRIES = [
-  "Portugal",
-  "Espanha",
-  "França",
-  "Itália",
-  "Grécia",
-  "Alemanha",
-  "Reino Unido",
-  "Holanda",
-  "Bélgica",
-  "Polónia",
-];
+interface UserStats {
+  level: number;
+  levelTitle: string;
+  xp: number;
+  nextLevelXp: number | null;
+  discoveries: number;
+  badgesCount: number;
+  postsCount: number;
+  groupsCount: number;
+}
+
+interface Challenge {
+  _id: string;
+  title: string;
+  description: string;
+  icon: string;
+  target: number;
+  type: string;
+  joined: boolean;
+  progress: number;
+  completed: boolean;
+  participantsCount: number;
+}
 
 const Home = () => {
   const [user, setUser] = useState<any>(null);
@@ -61,12 +78,18 @@ const Home = () => {
   const [filterType, setFilterType] = useState<"all" | "country">("all");
   const [selectedCountry, setSelectedCountry] = useState("");
   const [likedPosts, setLikedPosts] = useState<string[]>([]);
+  const [userStats, setUserStats] = useState<UserStats | null>(null);
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [commentText, setCommentText] = useState<{ [postId: string]: string }>({});
+  const [expandedComments, setExpandedComments] = useState<string[]>([]);
   const history = useHistory();
 
   useEffect(() => {
     const userData = authService.getUser();
     setUser(userData);
     loadPosts();
+    loadUserStats();
+    loadChallenges();
   }, []);
 
   useEffect(() => {
@@ -76,18 +99,24 @@ const Home = () => {
   const loadPosts = async () => {
     try {
       setLoading(true);
-      let url = "http://localhost:5000/api/posts";
+      let url = `${API_URL}/api/posts`;
 
       if (filterType === "country" && selectedCountry) {
-        url = `http://localhost:5000/api/posts/country/${selectedCountry}`;
+        url = `${API_URL}/api/posts/country/${selectedCountry}`;
       }
 
-      const response = await axios.get(url, {
-        params: { limit: 20 },
-      });
+      const response = await axios.get(url, { params: { limit: 20 } });
 
       if (response.data.success) {
         setPosts(response.data.data);
+        // Set liked posts based on current user
+        const userData = authService.getUser();
+        if (userData) {
+          const liked = response.data.data
+            .filter((p: Post) => p.likes.some((l: any) => l.userId === userData.id))
+            .map((p: Post) => p._id);
+          setLikedPosts(liked);
+        }
       }
     } catch (error) {
       console.error("Erro ao carregar posts:", error);
@@ -96,17 +125,59 @@ const Home = () => {
     }
   };
 
+  const loadUserStats = async () => {
+    try {
+      const token = authService.getToken();
+      if (!token) return;
+      const response = await axios.get(`${API_URL}/api/stats`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.data.success) {
+        setUserStats(response.data.data);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar stats:", error);
+    }
+  };
+
+  const loadChallenges = async () => {
+    try {
+      const token = authService.getToken();
+      if (!token) return;
+      // Seed challenges if none exist
+      await axios.post(`${API_URL}/api/challenges/seed`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      }).catch(() => {});
+      const response = await axios.get(`${API_URL}/api/challenges`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.data.success) {
+        setChallenges(response.data.data);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar desafios:", error);
+    }
+  };
+
+  const handleJoinChallenge = async (challengeId: string) => {
+    try {
+      const token = authService.getToken();
+      await axios.post(`${API_URL}/api/challenges/${challengeId}/join`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      loadChallenges();
+    } catch (error: any) {
+      alert(error.response?.data?.message || "Erro ao participar");
+    }
+  };
+
   const handleLikePost = async (postId: string) => {
     try {
       const token = authService.getToken();
       const response = await axios.put(
-        `http://localhost:5000/api/posts/${postId}/like`,
+        `${API_URL}/api/posts/${postId}/like`,
         {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (response.data.success) {
@@ -122,6 +193,31 @@ const Home = () => {
       }
     } catch (error) {
       console.error("Erro ao dar like:", error);
+    }
+  };
+
+  const handleAddComment = async (postId: string) => {
+    const text = commentText[postId]?.trim();
+    if (!text) return;
+    try {
+      const token = authService.getToken();
+      await axios.put(
+        `${API_URL}/api/posts/${postId}/comment`,
+        { text },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setCommentText({ ...commentText, [postId]: "" });
+      loadPosts();
+    } catch (error) {
+      console.error("Erro ao comentar:", error);
+    }
+  };
+
+  const toggleComments = (postId: string) => {
+    if (expandedComments.includes(postId)) {
+      setExpandedComments(expandedComments.filter((id) => id !== postId));
+    } else {
+      setExpandedComments([...expandedComments, postId]);
     }
   };
 
@@ -172,48 +268,83 @@ const Home = () => {
           </button>
         </div>
 
-        {/* 2. USER SUMMARY */}
+        {/* 2. USER SUMMARY — real data */}
         <div className="user-summary-card">
           <div className="user-info">
             <div className="avatar">{user?.name?.charAt(0) || "U"}</div>
             <div className="user-details">
               <h2>{user?.name || "Utilizador"}</h2>
-              <p className="cultural-level">Nível 3 - Explorador</p>
+              <p className="cultural-level">
+                Nível {userStats?.level || 1} - {userStats?.levelTitle || "Iniciante"}
+              </p>
             </div>
           </div>
           <div className="user-stats">
             <div className="stat">
-              <span className="stat-number">12</span>
+              <span className="stat-number">{userStats?.discoveries ?? 0}</span>
               <span className="stat-label">Descobertas</span>
             </div>
             <div className="stat">
-              <span className="stat-number">3</span>
+              <span className="stat-number">{userStats?.badgesCount ?? 0}</span>
               <span className="stat-label">Badges</span>
             </div>
             <div className="stat">
-              <span className="stat-number">5</span>
+              <span className="stat-number">{userStats?.groupsCount ?? 0}</span>
               <span className="stat-label">Grupos</span>
             </div>
           </div>
         </div>
 
-        {/* 3. ACTIVE CHALLENGES */}
+        {/* 3. ACTIVE CHALLENGES — real data */}
         <div className="section">
           <h3 className="section-title">Desafios Ativos</h3>
-          <div className="challenge-card">
-            <div className="challenge-header">
-              <IonIcon icon={trophyOutline} />
-              <h4>Explorador Medieval</h4>
-            </div>
-            <p className="challenge-description">
-              Descubra 5 monumentos medievais este mês
+          {challenges.length === 0 ? (
+            <p style={{ textAlign: "center", color: "#888", padding: "16px" }}>
+              Sem desafios disponíveis
             </p>
-            <div className="progress-bar">
-              <div className="progress-fill" style={{ width: "40%" }}></div>
-            </div>
-            <div className="progress-text">2 de 5 concluídos</div>
-            <button className="challenge-button">Participar</button>
-          </div>
+          ) : (
+            challenges.map((challenge) => (
+              <div key={challenge._id} className="challenge-card">
+                <div className="challenge-header">
+                  <IonIcon icon={trophyOutline} />
+                  <h4>{challenge.title}</h4>
+                </div>
+                <p className="challenge-description">{challenge.description}</p>
+                {challenge.joined && (
+                  <>
+                    <div className="progress-bar">
+                      <div
+                        className="progress-fill"
+                        style={{
+                          width: `${Math.min(
+                            (challenge.progress / challenge.target) * 100,
+                            100
+                          )}%`,
+                        }}
+                      ></div>
+                    </div>
+                    <div className="progress-text">
+                      {challenge.progress} de {challenge.target} concluídos
+                      {challenge.completed && " ✅"}
+                    </div>
+                  </>
+                )}
+                {!challenge.joined && !challenge.completed && (
+                  <button
+                    className="challenge-button"
+                    onClick={() => handleJoinChallenge(challenge._id)}
+                  >
+                    Participar
+                  </button>
+                )}
+                {challenge.joined && !challenge.completed && (
+                  <p style={{ fontSize: 12, color: "#888", marginTop: 4 }}>
+                    {challenge.participantsCount} participante(s)
+                  </p>
+                )}
+              </div>
+            ))
+          )}
         </div>
 
         {/* 4. COMMUNITY FEED */}
@@ -292,11 +423,50 @@ const Home = () => {
                   />
                   {post.likes.length}
                 </button>
-                <button className="action-btn">
+                <button
+                  className="action-btn"
+                  onClick={() => toggleComments(post._id)}
+                >
                   <IonIcon icon={chatbubbleOutline} />
                   {post.comments.length}
+                  <IonIcon
+                    icon={expandedComments.includes(post._id) ? chevronUpOutline : chevronDownOutline}
+                    style={{ fontSize: 12, marginLeft: 4 }}
+                  />
                 </button>
               </div>
+
+              {/* Comments section */}
+              {expandedComments.includes(post._id) && (
+                <div className="comments-section">
+                  {post.comments.length > 0 && (
+                    <div className="comments-list">
+                      {post.comments.map((c: any, idx: number) => (
+                        <div key={idx} className="comment-item">
+                          <strong>{c.userName}</strong>
+                          <span>{c.text}</span>
+                          <small>{formatDate(c.createdAt)}</small>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div className="comment-input-row">
+                    <IonInput
+                      placeholder="Escrever comentário..."
+                      value={commentText[post._id] || ""}
+                      onIonChange={(e) =>
+                        setCommentText({ ...commentText, [post._id]: e.detail.value || "" })
+                      }
+                    />
+                    <IonButton
+                      fill="clear"
+                      onClick={() => handleAddComment(post._id)}
+                    >
+                      <IonIcon icon={sendOutline} />
+                    </IonButton>
+                  </div>
+                </div>
+              )}
 
               <div className="post-metadata">
                 <span className="badge">{post.region}</span>

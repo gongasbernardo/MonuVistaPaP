@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+﻿import React, { useState, useEffect, useRef } from "react";
 import {
   IonPage,
   IonHeader,
@@ -36,6 +36,7 @@ import {
   lockClosed,
 } from "ionicons/icons";
 import axios from "axios";
+import { API_URL } from "../config";
 import BottomNav from "../components/BottomNav";
 import "./Groups.css";
 
@@ -188,7 +189,7 @@ const Groups: React.FC = () => {
 
   const fetchGroups = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/groups");
+      const response = await axios.get(`${API_URL}/api/groups`);
       setGroups(response.data.groups);
     } catch (error) {
       console.error("Error fetching groups:", error);
@@ -199,7 +200,7 @@ const Groups: React.FC = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "http://localhost:5000/api/groups/my/groups",
+        `${API_URL}/api/groups/my/groups`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -218,7 +219,7 @@ const Groups: React.FC = () => {
       if (!token) return;
 
       const response = await axios.get(
-        "http://localhost:5000/api/auth/notifications",
+        `${API_URL}/api/auth/notifications`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -242,7 +243,7 @@ const Groups: React.FC = () => {
       const token = localStorage.getItem("token");
       if (!token) return;
       await axios.post(
-        "http://localhost:5000/api/auth/notifications/read",
+        `${API_URL}/api/auth/notifications/read`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -262,19 +263,19 @@ const Groups: React.FC = () => {
   const handleKickMember = async () => {
     if (!selectedGroup || !memberToKick) return;
     if (!kickReason.trim()) {
-      alert("Por favor, indique o motivo da expulsão");
+      alert("Por favor, indique o motivo da expulsÃ£o");
       return;
     }
 
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("Erro: Token não encontrado. Faça login novamente.");
+        alert("Erro: Token nÃ£o encontrado. FaÃ§a login novamente.");
         return;
       }
 
       const response = await axios.post(
-        `http://localhost:5000/api/groups/${selectedGroup._id}/kick`,
+        `${API_URL}/api/groups/${selectedGroup._id}/kick`,
         { memberId: memberToKick._id, reason: kickReason.trim() },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -313,7 +314,7 @@ const Groups: React.FC = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("Erro: Token não encontrado. Faça login novamente.");
+        alert("Erro: Token nÃ£o encontrado. FaÃ§a login novamente.");
         return;
       }
 
@@ -323,7 +324,7 @@ const Groups: React.FC = () => {
         .filter((tag) => tag.length > 0);
 
       const response = await axios.post(
-        "http://localhost:5000/api/groups",
+        `${API_URL}/api/groups`,
         {
           name: newGroupName,
           description: newGroupDescription,
@@ -365,7 +366,7 @@ const Groups: React.FC = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        `http://localhost:5000/api/groups/${groupId}/join`,
+        `${API_URL}/api/groups/${groupId}/join`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -390,7 +391,7 @@ const Groups: React.FC = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        `http://localhost:5000/api/groups/${pendingGroupId}/join`,
+        `${API_URL}/api/groups/${pendingGroupId}/join`,
         { password: groupPasswordInput },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -415,7 +416,7 @@ const Groups: React.FC = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.post(
-        `http://localhost:5000/api/groups/${groupId}/leave`,
+        `${API_URL}/api/groups/${groupId}/leave`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -441,7 +442,7 @@ const Groups: React.FC = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        `http://localhost:5000/api/groups/${selectedGroup._id}/messages`,
+        `${API_URL}/api/groups/${selectedGroup._id}/messages`,
         { content: message },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -469,14 +470,14 @@ const Groups: React.FC = () => {
 
   const handleShareContent = async () => {
     if (!shareTitle.trim() || !selectedGroup) {
-      alert("Por favor, digite um título");
+      alert("Por favor, digite um tÃ­tulo");
       return;
     }
 
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        `http://localhost:5000/api/groups/${selectedGroup._id}/share`,
+        `${API_URL}/api/groups/${selectedGroup._id}/share`,
         {
           title: shareTitle,
           description: shareDescription,
@@ -502,10 +503,10 @@ const Groups: React.FC = () => {
       setShareTitle("");
       setShareDescription("");
       setShareImage("");
-      alert("Conteúdo partilhado com sucesso!");
+      alert("ConteÃºdo partilhado com sucesso!");
     } catch (error) {
       console.error("Error sharing content:", error);
-      alert("Erro ao partilhar conteúdo");
+      alert("Erro ao partilhar conteÃºdo");
     }
   };
 
@@ -524,7 +525,7 @@ const Groups: React.FC = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("Erro: Token não encontrado. Faça login novamente.");
+        alert("Erro: Token nÃ£o encontrado. FaÃ§a login novamente.");
         return;
       }
 
@@ -546,7 +547,7 @@ const Groups: React.FC = () => {
       }
 
       const response = await axios.put(
-        `http://localhost:5000/api/groups/${selectedGroup._id}`,
+        `${API_URL}/api/groups/${selectedGroup._id}`,
         payload,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -675,7 +676,7 @@ const Groups: React.FC = () => {
             {userGroups.length === 0 ? (
               <div className="empty-state">
                 <IonIcon icon={people} size="large" />
-                <p>Você não tem grupos ainda</p>
+                <p>VocÃª nÃ£o tem grupos ainda</p>
                 <p className="subtitle">
                   Crie um novo grupo ou descubra grupos existentes
                 </p>
@@ -723,7 +724,7 @@ const Groups: React.FC = () => {
               .length === 0 ? (
               <div className="empty-state">
                 <IonIcon icon={people} size="large" />
-                <p>Nenhum grupo disponível</p>
+                <p>Nenhum grupo disponÃ­vel</p>
               </div>
             ) : (
               groups
@@ -824,9 +825,9 @@ const Groups: React.FC = () => {
                 />
               </IonItem>
               <IonItem>
-                <IonLabel position="stacked">Descrição</IonLabel>
+                <IonLabel position="stacked">DescriÃ§Ã£o</IonLabel>
                 <IonTextarea
-                  placeholder="Digite a descrição do grupo"
+                  placeholder="Digite a descriÃ§Ã£o do grupo"
                   value={newGroupDescription}
                   onIonChange={(e) => setNewGroupDescription(e.detail.value || "")}
                 />
@@ -834,7 +835,7 @@ const Groups: React.FC = () => {
               <IonItem>
                 <IonLabel position="stacked">Tags</IonLabel>
                 <IonInput
-                  placeholder="Digite tags separadas por vírgula (ex: viagem, turismo)"
+                  placeholder="Digite tags separadas por vÃ­rgula (ex: viagem, turismo)"
                   value={newGroupTags}
                   onIonChange={(e) => setNewGroupTags(e.detail.value || "")}
                 />
@@ -853,7 +854,7 @@ const Groups: React.FC = () => {
                 {newGroupImage && (
                   <img
                     src={newGroupImage}
-                    alt="Pré-visualização"
+                    alt="PrÃ©-visualizaÃ§Ã£o"
                     className="image-preview"
                   />
                 )}
@@ -881,7 +882,7 @@ const Groups: React.FC = () => {
                   <IonLabel position="stacked">Palavra-passe *</IonLabel>
                   <IonInput
                     type="password"
-                    placeholder="Digite a palavra-passe (mín. 4 caracteres)"
+                    placeholder="Digite a palavra-passe (mÃ­n. 4 caracteres)"
                     value={newGroupPassword}
                     onIonChange={(e) => setNewGroupPassword(e.detail.value || "")}
                   />
@@ -981,7 +982,7 @@ const Groups: React.FC = () => {
                       <span className="stat-value">
                         {selectedGroup.sharedContent.length}
                       </span>
-                      <span className="stat-label">Conteúdo</span>
+                      <span className="stat-label">ConteÃºdo</span>
                     </div>
                   </div>
 
@@ -1055,10 +1056,10 @@ const Groups: React.FC = () => {
 
                 {/* Shared Content Section */}
                 <div className="section">
-                  <h3>Conteúdo Partilhado ({selectedGroup.sharedContent.length})</h3>
+                  <h3>ConteÃºdo Partilhado ({selectedGroup.sharedContent.length})</h3>
                   <div className="shared-content-list">
                     {selectedGroup.sharedContent.length === 0 ? (
-                      <p className="empty-text">Nenhum conteúdo partilhado</p>
+                      <p className="empty-text">Nenhum conteÃºdo partilhado</p>
                     ) : (
                       selectedGroup.sharedContent.map(
                         (content: any, idx: number) => (
@@ -1088,14 +1089,14 @@ const Groups: React.FC = () => {
                   </div>
 
                   <div className="share-form">
-                    <h4>Partilhar Conteúdo</h4>
+                    <h4>Partilhar ConteÃºdo</h4>
                     <IonInput
-                      placeholder="Título"
+                      placeholder="TÃ­tulo"
                       value={shareTitle}
                       onIonChange={(e) => setShareTitle(e.detail.value || "")}
                     />
                     <IonTextarea
-                      placeholder="Descrição"
+                      placeholder="DescriÃ§Ã£o"
                       value={shareDescription}
                       onIonChange={(e) =>
                         setShareDescription(e.detail.value || "")
@@ -1113,7 +1114,7 @@ const Groups: React.FC = () => {
                     {shareImage && (
                       <img
                         src={shareImage}
-                        alt="Pré-visualização"
+                        alt="PrÃ©-visualizaÃ§Ã£o"
                         className="image-preview"
                       />
                     )}
@@ -1169,7 +1170,7 @@ const Groups: React.FC = () => {
                 />
               </IonItem>
               <IonItem>
-                <IonLabel position="stacked">Descrição</IonLabel>
+                <IonLabel position="stacked">DescriÃ§Ã£o</IonLabel>
                 <IonTextarea
                   value={editGroupDescription}
                   onIonChange={(e) => setEditGroupDescription(e.detail.value || "")}
@@ -1178,7 +1179,7 @@ const Groups: React.FC = () => {
               <IonItem>
                 <IonLabel position="stacked">Tags</IonLabel>
                 <IonInput
-                  placeholder="Digite tags separadas por vírgula"
+                  placeholder="Digite tags separadas por vÃ­rgula"
                   value={editGroupTags}
                   onIonChange={(e) => setEditGroupTags(e.detail.value || "")}
                 />
@@ -1197,7 +1198,7 @@ const Groups: React.FC = () => {
                 {editGroupImage && (
                   <img
                     src={editGroupImage}
-                    alt="Pré-visualização"
+                    alt="PrÃ©-visualizaÃ§Ã£o"
                     className="image-preview"
                   />
                 )}
@@ -1243,7 +1244,7 @@ const Groups: React.FC = () => {
                 className="ion-margin-top"
                 onClick={handleUpdateGroup}
               >
-                Guardar alterações
+                Guardar alteraÃ§Ãµes
               </IonButton>
               <IonButton
                 expand="block"
@@ -1336,7 +1337,7 @@ const Groups: React.FC = () => {
                   </p>
                   <p>{memberToKick.email || ""}</p>
                   <p style={{ marginTop: "1rem", marginBottom: "0.5rem" }}>
-                    <strong>Indique o motivo da expulsão:</strong>
+                    <strong>Indique o motivo da expulsÃ£o:</strong>
                   </p>
                 </div>
                 <IonItem>

@@ -40,14 +40,25 @@ const Album = () => {
   const [showMonumentModal, setShowMonumentModal] = useState(false);
   const [selectedMonument, setSelectedMonument] = useState<AlbumMonument | null>(null);
   const [showActionSheet, setShowActionSheet] = useState(false);
-  
+  const [stats, setStats] = useState({ total: 0, visited: 0, toVisit: 0, countries: 0 });
+
   useEffect(() => {
     loadData();
   }, []);
 
-  const loadData = () => {
-    setMonuments(albumService.getMonuments());
-    setFolders(albumService.getFolders());
+  const loadData = async () => {
+    try {
+      const [m, f, s] = await Promise.all([
+        albumService.getMonuments(),
+        albumService.getFolders(),
+        albumService.getStats(),
+      ]);
+      setMonuments(m);
+      setFolders(f);
+      setStats(s);
+    } catch (e) {
+      console.error('Error loading album data:', e);
+    }
   };
 
   const getFilteredMonuments = () => {
@@ -68,27 +79,27 @@ const Album = () => {
     return filtered;
   };
 
-  const handleCreateFolder = (name: string, color: string) => {
-    albumService.createFolder(name, color || "#6B7280");
+  const handleCreateFolder = async (name: string, color: string) => {
+    await albumService.createFolder(name, color || "#6B7280");
     loadData();
   };
 
-  const handleToggleVisited = (monumentId: string, currentStatus: boolean) => {
+  const handleToggleVisited = async (monumentId: string, currentStatus: boolean) => {
     if (currentStatus) {
-      albumService.markAsToVisit(monumentId);
+      await albumService.markAsToVisit(monumentId);
     } else {
-      albumService.markAsVisited(monumentId);
+      await albumService.markAsVisited(monumentId);
     }
     loadData();
   };
 
-  const handleMoveToFolder = (monumentId: string, folderId: string) => {
-    albumService.moveToFolder(monumentId, folderId);
+  const handleMoveToFolder = async (monumentId: string, folderId: string) => {
+    await albumService.moveToFolder(monumentId, folderId);
     loadData();
   };
 
-  const handleDeleteMonument = (monumentId: string) => {
-    albumService.deleteMonument(monumentId);
+  const handleDeleteMonument = async (monumentId: string) => {
+    await albumService.deleteMonument(monumentId);
     loadData();
     setShowMonumentModal(false);
   };
@@ -97,12 +108,10 @@ const Album = () => {
     if (!monument.visitInfo.visited || !monument.visitInfo.date) {
       return "Por visitar";
     }
-    
     const date = new Date(monument.visitInfo.date);
-    return `${monument.visitInfo.day}/${monument.visitInfo.month}/${monument.visitInfo.year} às ${String(monument.visitInfo.hour).padStart(2, '0')}:${String(monument.visitInfo.minute).padStart(2, '0')}`;
+    return date.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
 
-  const stats = albumService.getStats();
   const filteredMonuments = getFilteredMonuments();
   const currentFolder = folders.find(f => f.id === selectedFolder);
 
