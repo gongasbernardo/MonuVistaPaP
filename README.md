@@ -31,6 +31,23 @@ npm run dev
 - Some features are prototypes or simulated (e.g. monument recognition and album service uses localStorage). See project files for details.
 - Configure backend URL in frontend API calls if deploying.
 
+## Environment variables
+Create a `.env` file in the `backend/` folder (you can copy `.env.example`) and set the following values:
+
+```
+MONGODB_URI=mongodb://localhost:27017/monuvista
+JWT_SECRET=your_strong_jwt_secret
+PORT=5000
+```
+
+## GitHub CI
+This repository includes basic GitHub Actions workflows under `.github/workflows/`:
+- `frontend-ci.yml` — installs dependencies and builds the frontend on push/PR for the `frontend/` folder.
+- `backend-ci.yml` — installs backend dependencies and runs basic checks on push/PR for the `backend/` folder.
+
+## License
+This project is licensed under the MIT License. See `LICENSE`.
+
 ## Next steps
 - Create a GitHub repo and push this project.
 - Add CI and environment variable handling for production.

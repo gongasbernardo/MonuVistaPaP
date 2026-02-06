@@ -1,0 +1,6 @@
+# Set default code owners for the repository
+# Format: <pattern> <github-username-or-team>
+# Example:
+# /src/ @your-github-username
+
+* @gongasbernardo

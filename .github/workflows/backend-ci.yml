@@ -1,0 +1,27 @@
+name: Backend CI
+
+on:
+  push:
+    paths:
+      - 'backend/**'
+  pull_request:
+    paths:
+      - 'backend/**'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        working-directory: backend
+        run: npm ci
+      - name: Run basic checks
+        working-directory: backend
+        run: |
+          echo "No build script defined for backend; running npm audit --audit-level=moderate"
+          npm audit --audit-level=moderate || true
