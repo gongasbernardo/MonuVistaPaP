@@ -89,7 +89,6 @@ const Groups: React.FC = () => {
   const [unreadCount, setUnreadCount] = useState(0);
 
   const messagesListRef = useRef<HTMLDivElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const isNearBottomRef = useRef(true);
 
   const createModalRef = useRef<HTMLIonModalElement>(null);
@@ -149,7 +148,7 @@ const Groups: React.FC = () => {
           return { ...prev, messages: [...prev.messages, data.message] };
         });
         if (isNearBottomRef.current) {
-          setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+          setTimeout(() => { const el = messagesListRef.current; if (el) el.scrollTop = el.scrollHeight; }, 50);
         } else {
           setUnreadCount((prev) => prev + 1);
         }
@@ -510,7 +509,7 @@ const Groups: React.FC = () => {
       );
       setMessage("");
       setUnreadCount(0);
-      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+      setTimeout(() => { const el = messagesListRef.current; if (el) el.scrollTop = el.scrollHeight; }, 50);
     } catch (error) {
       console.error("Error sending message:", error);
       alert("Erro ao enviar mensagem");
@@ -631,7 +630,7 @@ const Groups: React.FC = () => {
     isNearBottomRef.current = true;
     openDetailModal();
     // Scroll to bottom once the modal content renders
-    setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'auto' }), 300);
+    setTimeout(() => { const el = messagesListRef.current; if (el) el.scrollTop = el.scrollHeight; }, 300);
   };
 
   if (loading) {
@@ -1103,13 +1102,13 @@ const Groups: React.FC = () => {
                         </div>
                       ))
                     )}
-                    <div ref={messagesEndRef} />
                   </div>
                   {unreadCount > 0 && (
                     <div
                       className="new-messages-badge"
                       onClick={() => {
-                        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+                        const el = messagesListRef.current;
+                        if (el) el.scrollTop = el.scrollHeight;
                         setUnreadCount(0);
                       }}
                     >

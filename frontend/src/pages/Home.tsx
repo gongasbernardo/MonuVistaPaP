@@ -16,17 +16,14 @@ import {
   cameraOutline,
   trophyOutline,
   locationOutline,
-  addCircleOutline,
   heartOutline,
   heartSharp,
   chatbubbleOutline,
-  sparklesOutline,
   sendOutline,
   chevronDownOutline,
   chevronUpOutline,
 } from "ionicons/icons";
 import authService from "../services/authService";
-import { useHistory } from "react-router-dom";
 import axios from "axios";
 import { API_URL } from "../config";
 import { COUNTRIES } from "../constants/locations";
@@ -82,7 +79,6 @@ const Home = () => {
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [commentText, setCommentText] = useState<{ [postId: string]: string }>({});
   const [expandedComments, setExpandedComments] = useState<string[]>([]);
-  const history = useHistory();
 
   useEffect(() => {
     const userData = authService.getUser();
@@ -235,10 +231,6 @@ const Home = () => {
     return date.toLocaleDateString("pt-PT");
   };
 
-  const navigateTo = (path: string) => {
-    history.push(path);
-  };
-
   return (
     <IonPage>
       <IonHeader className="home-header">
@@ -250,25 +242,7 @@ const Home = () => {
       </IonHeader>
 
       <IonContent className="home-content">
-        {/* 1. ACTION BUTTON - CREATE POST */}
-        <div className="action-section">
-          <button
-            className="explore-button"
-            onClick={() => navigateTo("/visit")}
-          >
-            <IonIcon icon={sparklesOutline} />
-            <span>Visitar com IA</span>
-          </button>
-          <button
-            className="explore-button secondary"
-            onClick={() => navigateTo("/create-post")}
-          >
-            <IonIcon icon={addCircleOutline} />
-            <span>Criar Publicação</span>
-          </button>
-        </div>
-
-        {/* 2. USER SUMMARY — real data */}
+        {/* 1. USER SUMMARY — real data */}
         <div className="user-summary-card">
           <div className="user-info">
             <div className="avatar">{user?.name?.charAt(0) || "U"}</div>

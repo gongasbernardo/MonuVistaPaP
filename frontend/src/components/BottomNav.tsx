@@ -6,15 +6,13 @@ import {
 } from "@ionic/react";
 import {
   homeOutline,
-  addCircleOutline,
   albumsOutline,
   peopleOutline,
   sparklesOutline,
   chatbubbleOutline,
-  logOutOutline,
+  personOutline,
 } from "ionicons/icons";
 import { useHistory, useLocation } from "react-router-dom";
-import authService from "../services/authService";
 import "./BottomNav.css";
 
 const BottomNav = () => {
@@ -25,11 +23,6 @@ const BottomNav = () => {
     if (location.pathname !== path) {
       history.push(path);
     }
-  };
-
-  const handleLogout = () => {
-    authService.logout();
-    history.push("/login");
   };
 
   const isActive = (path: string) => location.pathname === path;
@@ -43,14 +36,6 @@ const BottomNav = () => {
       >
         <IonIcon icon={homeOutline} />
         <IonLabel>Início</IonLabel>
-      </IonTabButton>
-      <IonTabButton
-        tab="create"
-        className={isActive("/create-post") ? "nav-active" : ""}
-        onClick={() => navigateTo("/create-post")}
-      >
-        <IonIcon icon={addCircleOutline} />
-        <IonLabel>Criar</IonLabel>
       </IonTabButton>
       <IonTabButton
         tab="album"
@@ -85,11 +70,12 @@ const BottomNav = () => {
         <IonLabel>Visitar</IonLabel>
       </IonTabButton>
       <IonTabButton
-        tab="logout"
-        onClick={handleLogout}
+        tab="profile"
+        className={isActive("/profile") ? "nav-active" : ""}
+        onClick={() => navigateTo("/profile")}
       >
-        <IonIcon icon={logOutOutline} />
-        <IonLabel>Sair</IonLabel>
+        <IonIcon icon={personOutline} />
+        <IonLabel>Perfil</IonLabel>
       </IonTabButton>
     </IonTabBar>
   );

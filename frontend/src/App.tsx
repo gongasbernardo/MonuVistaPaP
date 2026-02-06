@@ -4,11 +4,11 @@ import { IonReactRouter } from '@ionic/react-router';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
-import CreatePost from './pages/CreatePost';
 import Album from './pages/Album';
 import Community from './pages/Community';
 import VisitPlace from './pages/VisitPlace';
 import Groups from './pages/Groups';
+import Profile from './pages/Profile';
 import authService from './services/authService';
 
 /* Core CSS required for Ionic components to work properly */
@@ -52,9 +52,6 @@ const App: React.FC = () => (
         <ProtectedRoute exact path="/home">
           <Home />
         </ProtectedRoute>
-        <ProtectedRoute exact path="/create-post">
-          <CreatePost />
-        </ProtectedRoute>
         <ProtectedRoute exact path="/album">
           <Album />
         </ProtectedRoute>
@@ -66,6 +63,9 @@ const App: React.FC = () => (
         </ProtectedRoute>
         <ProtectedRoute exact path="/visit">
           <VisitPlace />
+        </ProtectedRoute>
+        <ProtectedRoute exact path="/profile">
+          <Profile />
         </ProtectedRoute>
         <Route exact path="/">
           <Redirect to="/login" />

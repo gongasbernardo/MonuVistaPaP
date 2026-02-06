@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   IonPage,
   IonHeader,
@@ -13,6 +13,12 @@ import {
   IonSegmentButton,
   IonInput,
   IonButton,
+  IonModal,
+  IonTextarea,
+  IonSelect,
+  IonSelectOption,
+  IonFab,
+  IonFabButton,
 } from "@ionic/react";
 import {
   peopleOutline,
@@ -24,10 +30,13 @@ import {
   sendOutline,
   chevronDownOutline,
   chevronUpOutline,
+  addOutline,
+  closeOutline,
+  imageOutline,
 } from "ionicons/icons";
 import axios from "axios";
 import { API_URL } from "../config";
-import { COUNTRIES } from "../constants/locations";
+import { COUNTRIES, REGIONS_BY_COUNTRY } from "../constants/locations";
 import authService from "../services/authService";
 import BottomNav from "../components/BottomNav";
 import "./Community.css";
@@ -54,6 +63,81 @@ const Community = () => {
   const [likedPosts, setLikedPosts] = useState<string[]>([]);
   const [commentText, setCommentText] = useState<{ [postId: string]: string }>({});
   const [expandedComments, setExpandedComments] = useState<string[]>([]);
+
+  // Create Post modal state
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const [newDescription, setNewDescription] = useState("");
+  const [newLocation, setNewLocation] = useState("");
+  const [newCountry, setNewCountry] = useState("");
+  const [newRegion, setNewRegion] = useState("");
+  const [newImage, setNewImage] = useState<string | null>(null);
+  const [newImagePreview, setNewImagePreview] = useState<string | null>(null);
+  const [createLoading, setCreateLoading] = useState(false);
+  const [createError, setCreateError] = useState("");
+  const createFileInputRef = useRef<HTMLInputElement>(null);
+  const createModalRef = useRef<HTMLIonModalElement>(null);
+
+  const handleCreateImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        setNewImage(result);
+        setNewImagePreview(result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const resetCreateForm = () => {
+    setNewTitle("");
+    setNewDescription("");
+    setNewLocation("");
+    setNewCountry("");
+    setNewRegion("");
+    setNewImage(null);
+    setNewImagePreview(null);
+    setCreateError("");
+  };
+
+  const handleCreatePost = async () => {
+    setCreateError("");
+    if (!newTitle || !newDescription || !newLocation || !newCountry || !newRegion || !newImage) {
+      setCreateError("Por favor preencha todos os campos");
+      return;
+    }
+    if (newTitle.length > 100) {
+      setCreateError("Título não pode ter mais de 100 caracteres");
+      return;
+    }
+    if (newDescription.length > 1000) {
+      setCreateError("Descrição não pode ter mais de 1000 caracteres");
+      return;
+    }
+    try {
+      setCreateLoading(true);
+      const token = authService.getToken();
+      const response = await axios.post(
+        `${API_URL}/api/posts`,
+        { title: newTitle, description: newDescription, location: newLocation, country: newCountry, region: newRegion, image: newImage },
+        { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+      );
+      if (response.data.success) {
+        resetCreateForm();
+        setShowCreateModal(false);
+        createModalRef.current?.dismiss();
+        loadPosts();
+      }
+    } catch (err: any) {
+      setCreateError(err.response?.data?.message || "Erro ao criar publicação");
+    } finally {
+      setCreateLoading(false);
+    }
+  };
+
+  const availableNewRegions = newCountry ? (REGIONS_BY_COUNTRY[newCountry] || []) : [];
 
   useEffect(() => {
     loadPosts();
@@ -336,6 +420,109 @@ const Community = () => {
             </div>
           ))}
         </div>
+
+        {/* FAB - Create Post Button */}
+        <IonFab vertical="bottom" horizontal="end" slot="fixed" style={{ marginBottom: 56 }}>
+          <IonFabButton onClick={() => { resetCreateForm(); setShowCreateModal(true); createModalRef.current?.present(); }}>
+            <IonIcon icon={addOutline} />
+          </IonFabButton>
+        </IonFab>
+
+        {/* Create Post Modal */}
+        <IonModal ref={createModalRef} isOpen={showCreateModal} onDidDismiss={() => setShowCreateModal(false)}>
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>Nova Publicação</IonTitle>
+              <IonButtons slot="end">
+                <IonButton onClick={() => { setShowCreateModal(false); createModalRef.current?.dismiss(); }}>
+                  <IonIcon icon={closeOutline} />
+                </IonButton>
+              </IonButtons>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent className="create-post-content">
+            <div className="create-post-form" style={{ padding: 16 }}>
+              {/* Image Upload */}
+              <div className="image-upload-section" style={{ marginBottom: 16 }}>
+                {newImagePreview ? (
+                  <div
+                    style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', cursor: 'pointer' }}
+                    onClick={() => createFileInputRef.current?.click()}
+                  >
+                    <img src={newImagePreview} alt="Preview" style={{ width: '100%', maxHeight: 200, objectFit: 'cover' }} />
+                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                      <IonIcon icon={imageOutline} style={{ fontSize: 32 }} />
+                      <p style={{ margin: 4 }}>Alterar Foto</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => createFileInputRef.current?.click()}
+                    style={{ border: '2px dashed #ccc', borderRadius: 12, padding: 32, textAlign: 'center', cursor: 'pointer', color: '#999' }}
+                  >
+                    <IonIcon icon={imageOutline} style={{ fontSize: 48 }} />
+                    <p>Seleccionar Foto</p>
+                  </div>
+                )}
+                <input
+                  ref={createFileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleCreateImageChange}
+                  style={{ display: 'none' }}
+                />
+              </div>
+
+              {/* Title */}
+              <div style={{ marginBottom: 12 }}>
+                <label style={{ fontWeight: 600, fontSize: 14 }}>Título da Estrutura</label>
+                <IonInput value={newTitle} onIonChange={(e) => setNewTitle(e.detail.value || "")} placeholder="Ex: Torre de Belém" maxlength={100} />
+                <p style={{ fontSize: 11, color: '#999', textAlign: 'right', margin: 0 }}>{newTitle.length}/100</p>
+              </div>
+
+              {/* Description */}
+              <div style={{ marginBottom: 12 }}>
+                <label style={{ fontWeight: 600, fontSize: 14 }}>Descrição</label>
+                <IonTextarea value={newDescription} onIonChange={(e) => setNewDescription(e.detail.value || "")} placeholder="Descreva a estrutura..." maxlength={1000} rows={4} />
+                <p style={{ fontSize: 11, color: '#999', textAlign: 'right', margin: 0 }}>{newDescription.length}/1000</p>
+              </div>
+
+              {/* Location */}
+              <div style={{ marginBottom: 12 }}>
+                <label style={{ fontWeight: 600, fontSize: 14 }}>Localização</label>
+                <IonInput value={newLocation} onIonChange={(e) => setNewLocation(e.detail.value || "")} placeholder="Ex: Lisbon, Belém" />
+              </div>
+
+              {/* Country */}
+              <div style={{ marginBottom: 12 }}>
+                <label style={{ fontWeight: 600, fontSize: 14 }}>País</label>
+                <IonSelect value={newCountry} onIonChange={(e) => { setNewCountry(e.detail.value); setNewRegion(""); }} placeholder="Seleccione um país">
+                  {COUNTRIES.map((c) => (
+                    <IonSelectOption key={c} value={c}>{c}</IonSelectOption>
+                  ))}
+                </IonSelect>
+              </div>
+
+              {/* Region */}
+              <div style={{ marginBottom: 12 }}>
+                <label style={{ fontWeight: 600, fontSize: 14 }}>Região</label>
+                <IonSelect value={newRegion} onIonChange={(e) => setNewRegion(e.detail.value)} placeholder={newCountry ? "Seleccione uma região" : "Seleccione um país primeiro"} disabled={!newCountry}>
+                  {availableNewRegions.map((r) => (
+                    <IonSelectOption key={r} value={r}>{r}</IonSelectOption>
+                  ))}
+                </IonSelect>
+              </div>
+
+              {/* Error */}
+              {createError && <div style={{ color: '#eb445a', textAlign: 'center', marginBottom: 12, fontSize: 14 }}>{createError}</div>}
+
+              {/* Submit */}
+              <IonButton expand="block" onClick={handleCreatePost} disabled={createLoading}>
+                {createLoading ? "A publicar..." : "Publicar"}
+              </IonButton>
+            </div>
+          </IonContent>
+        </IonModal>
       </IonContent>
       <BottomNav />
     </IonPage>
