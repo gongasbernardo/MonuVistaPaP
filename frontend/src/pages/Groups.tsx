@@ -95,6 +95,7 @@ const Groups: React.FC = () => {
   const newGroupImageInputRef = useRef<HTMLInputElement>(null);
   const shareImageInputRef = useRef<HTMLInputElement>(null);
   const editGroupImageInputRef = useRef<HTMLInputElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const storedUserId = localStorage.getItem("userId");
@@ -116,6 +117,44 @@ const Groups: React.FC = () => {
     fetchUserGroups();
     fetchNotifications();
   }, []);
+
+  // Poll for new messages every 3 seconds when a group is selected
+  useEffect(() => {
+    if (!selectedGroup) return;
+
+    const pollMessages = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(
+          `${API_URL}/api/groups/${selectedGroup._id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const fetchedGroup = response.data.group;
+        if (fetchedGroup && fetchedGroup.messages) {
+          // Only update if there are new messages (avoid unnecessary re-renders)
+          setSelectedGroup((prev) => {
+            if (!prev) return prev;
+            if (fetchedGroup.messages.length !== prev.messages.length) {
+              return { ...prev, messages: fetchedGroup.messages, sharedContent: fetchedGroup.sharedContent };
+            }
+            return prev;
+          });
+        }
+      } catch (error) {
+        // Silently ignore polling errors
+      }
+    };
+
+    const intervalId = setInterval(pollMessages, 3000);
+    return () => clearInterval(intervalId);
+  }, [selectedGroup?._id]);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (selectedGroup?.messages?.length) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [selectedGroup?.messages?.length]);
 
   const openCreateModal = () => {
     createModalRef.current?.present();
@@ -1040,6 +1079,7 @@ const Groups: React.FC = () => {
                         </div>
                       ))
                     )}
+                    <div ref={messagesEndRef} />
                   </div>
 
                   <div className="message-input">
