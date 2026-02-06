@@ -1,11 +1,48 @@
 const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+// Load .env from backend/ first, fall back to project root
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+if (!process.env.JWT_SECRET) {
+  require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+}
 const express = require('express');
 const cors = require('cors');
+const http = require('http');
+const { Server } = require('socket.io');
 const connectDB = require('./config/database');
 
 // Initialize express
 const app = express();
+const server = http.createServer(app);
+
+// Initialize Socket.IO
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+  },
+});
+
+// Make io accessible to controllers
+app.set('io', io);
+
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.id);
+
+  socket.on('join-group', (groupId) => {
+    socket.join(groupId);
+    console.log(`Socket ${socket.id} joined group ${groupId}`);
+  });
+
+  socket.on('leave-group', (groupId) => {
+    socket.leave(groupId);
+    console.log(`Socket ${socket.id} left group ${groupId}`);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
+});
 
 // Connect to database
 connectDB();
@@ -40,6 +77,6 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

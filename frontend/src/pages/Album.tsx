@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   IonPage,
   IonHeader,
@@ -10,11 +10,9 @@ import {
   IonSegmentButton,
   IonFab,
   IonFabButton,
-  IonAlert,
   IonActionSheet,
   IonModal,
   IonButton,
-  IonInput,
 } from "@ionic/react";
 import {
   folderOutline,
@@ -37,6 +35,8 @@ const Album = () => {
   const [selectedFolder, setSelectedFolder] = useState<string>("all");
   const [filterType, setFilterType] = useState<"all" | "visited" | "tovisit">("all");
   const [showNewFolderAlert, setShowNewFolderAlert] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
+  const [newFolderColor, setNewFolderColor] = useState("#6B7280");
   const [showMonumentModal, setShowMonumentModal] = useState(false);
   const [selectedMonument, setSelectedMonument] = useState<AlbumMonument | null>(null);
   const [showActionSheet, setShowActionSheet] = useState(false);
@@ -113,7 +113,6 @@ const Album = () => {
   };
 
   const filteredMonuments = getFilteredMonuments();
-  const currentFolder = folders.find(f => f.id === selectedFolder);
 
   return (
     <IonPage>
@@ -248,39 +247,39 @@ const Album = () => {
           </IonFabButton>
         </IonFab>
 
-        {/* Alert para nova pasta */}
-        <IonAlert
-          isOpen={showNewFolderAlert}
-          onDidDismiss={() => setShowNewFolderAlert(false)}
-          header="Nova Pasta"
-          inputs={[
-            {
-              name: "name",
-              type: "text",
-              placeholder: "Nome da pasta",
-            },
-            {
-              name: "color",
-              type: "text",
-              placeholder: "Cor (ex: #FF5733)",
-              value: "#6B7280",
-            },
-          ]}
-          buttons={[
-            {
-              text: "Cancelar",
-              role: "cancel",
-            },
-            {
-              text: "Criar",
-              handler: (data) => {
-                if (data.name) {
-                  handleCreateFolder(data.name, data.color);
-                }
-              },
-            },
-          ]}
-        />
+        {/* Custom overlay para nova pasta */}
+        {showNewFolderAlert && (
+          <div className="custom-alert-overlay" onClick={() => setShowNewFolderAlert(false)}>
+            <div className="custom-alert" onClick={e => e.stopPropagation()}>
+              <h3>Nova Pasta</h3>
+              <input
+                type="text"
+                placeholder="Nome da pasta"
+                value={newFolderName}
+                onChange={e => setNewFolderName(e.target.value)}
+                className="custom-alert-input"
+              />
+              <input
+                type="text"
+                placeholder="Cor (ex: #FF5733)"
+                value={newFolderColor}
+                onChange={e => setNewFolderColor(e.target.value)}
+                className="custom-alert-input"
+              />
+              <div className="custom-alert-buttons">
+                <button onClick={() => { setShowNewFolderAlert(false); setNewFolderName(""); setNewFolderColor("#6B7280"); }}>Cancelar</button>
+                <button className="primary" onClick={() => {
+                  if (newFolderName.trim()) {
+                    handleCreateFolder(newFolderName.trim(), newFolderColor);
+                    setNewFolderName("");
+                    setNewFolderColor("#6B7280");
+                    setShowNewFolderAlert(false);
+                  }
+                }}>Criar</button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Modal de Detalhes */}
         <IonModal
@@ -393,20 +392,22 @@ const Album = () => {
           isOpen={showActionSheet}
           onDidDismiss={() => setShowActionSheet(false)}
           header="Mover para Pasta"
-          buttons={folders.map(folder => ({
-            text: folder.name,
-            handler: () => {
-              if (selectedMonument) {
-                handleMoveToFolder(selectedMonument.id, folder.id);
-                setShowMonumentModal(false);
-              }
-            },
-          })).concat([
+          buttons={[
+            ...folders.map(folder => ({
+              text: folder.name,
+              handler: () => {
+                if (selectedMonument) {
+                  handleMoveToFolder(selectedMonument.id, folder.id);
+                  setShowMonumentModal(false);
+                }
+              },
+            })),
             {
               text: "Cancelar",
-              role: "cancel",
+              role: "cancel" as const,
+              handler: () => {},
             },
-          ])}
+          ]}
         />
       </IonContent>
 

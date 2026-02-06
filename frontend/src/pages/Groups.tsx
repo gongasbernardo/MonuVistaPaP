@@ -36,6 +36,7 @@ import {
   lockClosed,
 } from "ionicons/icons";
 import axios from "axios";
+import { io, Socket } from "socket.io-client";
 import { API_URL } from "../config";
 import BottomNav from "../components/BottomNav";
 import "./Groups.css";
@@ -95,7 +96,6 @@ const Groups: React.FC = () => {
   const newGroupImageInputRef = useRef<HTMLInputElement>(null);
   const shareImageInputRef = useRef<HTMLInputElement>(null);
   const editGroupImageInputRef = useRef<HTMLInputElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const storedUserId = localStorage.getItem("userId");
@@ -118,43 +118,41 @@ const Groups: React.FC = () => {
     fetchNotifications();
   }, []);
 
-  // Poll for new messages every 3 seconds when a group is selected
-  useEffect(() => {
-    if (!selectedGroup) return;
+  // Socket.IO connection for real-time messages
+  const socketRef = useRef<Socket | null>(null);
 
-    const pollMessages = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await axios.get(
-          `${API_URL}/api/groups/${selectedGroup._id}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        const fetchedGroup = response.data.group;
-        if (fetchedGroup && fetchedGroup.messages) {
-          // Only update if there are new messages (avoid unnecessary re-renders)
-          setSelectedGroup((prev) => {
-            if (!prev) return prev;
-            if (fetchedGroup.messages.length !== prev.messages.length) {
-              return { ...prev, messages: fetchedGroup.messages, sharedContent: fetchedGroup.sharedContent };
-            }
-            return prev;
-          });
-        }
-      } catch (error) {
-        // Silently ignore polling errors
+  useEffect(() => {
+    const socket = io(API_URL, { transports: ['websocket', 'polling'] });
+    socketRef.current = socket;
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+  // Join/leave group rooms and listen for new messages
+  useEffect(() => {
+    const socket = socketRef.current;
+    if (!socket || !selectedGroup) return;
+
+    const groupId = selectedGroup._id;
+    socket.emit('join-group', groupId);
+
+    const handleNewMessage = (data: { groupId: string; message: any }) => {
+      if (data.groupId === groupId) {
+        setSelectedGroup((prev) => {
+          if (!prev || prev._id !== data.groupId) return prev;
+          return { ...prev, messages: [...prev.messages, data.message] };
+        });
       }
     };
 
-    const intervalId = setInterval(pollMessages, 3000);
-    return () => clearInterval(intervalId);
-  }, [selectedGroup?._id]);
+    socket.on('new-message', handleNewMessage);
 
-  // Auto-scroll to bottom when new messages arrive
-  useEffect(() => {
-    if (selectedGroup?.messages?.length) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [selectedGroup?.messages?.length]);
+    return () => {
+      socket.emit('leave-group', groupId);
+      socket.off('new-message', handleNewMessage);
+    };
+  }, [selectedGroup?._id]);
 
   const openCreateModal = () => {
     createModalRef.current?.present();
@@ -1079,7 +1077,6 @@ const Groups: React.FC = () => {
                         </div>
                       ))
                     )}
-                    <div ref={messagesEndRef} />
                   </div>
 
                   <div className="message-input">

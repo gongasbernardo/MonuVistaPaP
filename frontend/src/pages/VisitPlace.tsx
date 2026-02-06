@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   IonPage,
   IonHeader,
@@ -10,9 +10,6 @@ import {
   IonLoading,
   IonCard,
   IonCardContent,
-  IonAlert,
-  IonSelect,
-  IonSelectOption,
 } from "@ionic/react";
 import {
   cameraOutline,
@@ -26,7 +23,7 @@ import {
   folderOutline,
 } from "ionicons/icons";
 import BottomNav from "../components/BottomNav";
-import albumService from "../services/albumService";
+import albumService, { Folder } from "../services/albumService";
 import "./VisitPlace.css";
 
 interface Monument {
@@ -157,8 +154,14 @@ const VisitPlace = () => {
   const [selectedFolder, setSelectedFolder] = useState("default");
   const [isVisited, setIsVisited] = useState(true);
   const [alreadyInAlbum, setAlreadyInAlbum] = useState(false);
+  const [showFolderPicker, setShowFolderPicker] = useState(false);
+  const [pendingVisited, setPendingVisited] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const folders = albumService.getFolders();
+  const [folders, setFolders] = useState<Folder[]>([]);
+
+  useEffect(() => {
+    albumService.getFolders().then(setFolders).catch(console.error);
+  }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -195,7 +198,8 @@ const VisitPlace = () => {
     });
     
     // Verificar se já está no álbum
-    setAlreadyInAlbum(albumService.isInAlbum(monument.name));
+    const inAlbum = await albumService.isInAlbum(monument.name);
+    setAlreadyInAlbum(inAlbum);
     
     setAnalyzing(false);
     setLoading(false);
@@ -210,10 +214,13 @@ const VisitPlace = () => {
     setIsVisited(true);
   };
 
-  const handleAddToAlbum = () => {
+  const handleAddToAlbum = async (folderIdOverride?: string, visitedOverride?: boolean) => {
     if (!result || !image) return;
 
-    albumService.addMonument(
+    const folder = folderIdOverride || selectedFolder;
+    const visited = visitedOverride !== undefined ? visitedOverride : isVisited;
+
+    await albumService.addMonument(
       {
         name: result.name,
         location: result.location,
@@ -225,9 +232,9 @@ const VisitPlace = () => {
         history: result.history,
         funFacts: result.funFacts,
         image: image,
-        folderId: selectedFolder,
+        folderId: folder,
       },
-      isVisited
+      visited
     );
 
     setAlreadyInAlbum(true);
@@ -417,66 +424,58 @@ const VisitPlace = () => {
           </div>
         )}
 
-        {/* Alert para adicionar ao álbum */}
-        <IonAlert
-          isOpen={showAddAlert}
-          onDidDismiss={() => setShowAddAlert(false)}
-          header="Adicionar ao Álbum"
-          message="Escolha a pasta e estado da visita"
-          inputs={[
-            {
-              type: 'radio',
-              label: 'Visitado (guarda data automaticamente)',
-              value: 'visited',
-              checked: isVisited,
-            },
-            {
-              type: 'radio',
-              label: 'Por Visitar',
-              value: 'tovisit',
-              checked: !isVisited,
-            },
-          ]}
-          buttons={[
-            {
-              text: 'Cancelar',
-              role: 'cancel',
-            },
-            {
-              text: 'Adicionar',
-              handler: (value) => {
-                setIsVisited(value === 'visited');
-                // Mostrar segundo alert para pasta
-                setTimeout(() => {
-                  const folderAlert = document.createElement('ion-alert');
-                  folderAlert.header = 'Escolher Pasta';
-                  folderAlert.inputs = folders.map(f => ({
-                    type: 'radio',
-                    label: f.name,
-                    value: f.id,
-                    checked: f.id === selectedFolder,
-                  }));
-                  folderAlert.buttons = [
-                    {
-                      text: 'Cancelar',
-                      role: 'cancel',
-                    },
-                    {
-                      text: 'Confirmar',
-                      handler: (folderId) => {
-                        setSelectedFolder(folderId);
-                        setIsVisited(value === 'visited');
-                        handleAddToAlbum();
-                      },
-                    },
-                  ];
-                  document.body.appendChild(folderAlert);
-                  folderAlert.present();
-                }, 300);
-              },
-            },
-          ]}
-        />
+        {/* Custom overlay para adicionar ao álbum */}
+        {showAddAlert && (
+          <div className="custom-alert-overlay" onClick={() => setShowAddAlert(false)}>
+            <div className="custom-alert" onClick={e => e.stopPropagation()}>
+              <h3>Adicionar ao Álbum</h3>
+              <p style={{ fontSize: 13, color: '#666', marginBottom: 12 }}>Escolha o estado da visita</p>
+              <label className="custom-radio">
+                <input type="radio" name="visitState" value="visited" checked={pendingVisited} onChange={() => setPendingVisited(true)} />
+                Visitado (guarda data automaticamente)
+              </label>
+              <label className="custom-radio">
+                <input type="radio" name="visitState" value="tovisit" checked={!pendingVisited} onChange={() => setPendingVisited(false)} />
+                Por Visitar
+              </label>
+              <div className="custom-alert-buttons">
+                <button onClick={() => setShowAddAlert(false)}>Cancelar</button>
+                <button className="primary" onClick={() => {
+                  setShowAddAlert(false);
+                  setShowFolderPicker(true);
+                }}>Seguinte</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Custom overlay para escolher pasta */}
+        {showFolderPicker && (
+          <div className="custom-alert-overlay" onClick={() => setShowFolderPicker(false)}>
+            <div className="custom-alert" onClick={e => e.stopPropagation()}>
+              <h3>Escolher Pasta</h3>
+              {folders.map(f => (
+                <label key={f.id} className="custom-radio">
+                  <input
+                    type="radio"
+                    name="folderPick"
+                    value={f.id}
+                    checked={selectedFolder === f.id}
+                    onChange={() => setSelectedFolder(f.id)}
+                  />
+                  {f.name}
+                </label>
+              ))}
+              <div className="custom-alert-buttons">
+                <button onClick={() => setShowFolderPicker(false)}>Cancelar</button>
+                <button className="primary" onClick={() => {
+                  setShowFolderPicker(false);
+                  handleAddToAlbum(selectedFolder, pendingVisited);
+                }}>Confirmar</button>
+              </div>
+            </div>
+          </div>
+        )}
       </IonContent>
 
       <BottomNav />

@@ -356,6 +356,14 @@ exports.addMessage = async (req, res) => {
     await group.save();
     await group.populate('owner members', 'email name');
 
+    // Emit new message to all users in the group room via Socket.IO
+    const io = req.app.get('io');
+    const newMsg = group.messages[group.messages.length - 1];
+    io.to(groupId).emit('new-message', {
+      groupId,
+      message: newMsg,
+    });
+
     res.status(201).json({
       success: true,
       message: 'Message added successfully',

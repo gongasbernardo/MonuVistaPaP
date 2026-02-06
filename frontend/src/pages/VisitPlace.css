@@ -468,3 +468,97 @@
     padding: 8px 12px;
   }
 }
+
+/* ========================================
+   CUSTOM ALERT OVERLAY (replaces IonAlert)
+   ======================================== */
+
+.custom-alert-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 30000;
+  animation: fadeIn 0.15s ease;
+}
+
+.custom-alert {
+  background: #fff;
+  border-radius: 14px;
+  padding: 24px;
+  width: 88%;
+  max-width: 340px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+  animation: scaleIn 0.2s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+.custom-alert h3 {
+  margin: 0 0 16px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.custom-alert-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 10px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.custom-alert-input:focus {
+  border-color: #E8805F;
+  box-shadow: 0 0 0 2px rgba(232,128,95,0.15);
+}
+
+.custom-radio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+}
+
+.custom-radio input[type="radio"] {
+  accent-color: #E8805F;
+}
+
+.custom-alert-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.custom-alert-buttons button {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  background: #F3F4F6;
+  color: #4B5563;
+}
+
+.custom-alert-buttons button.primary {
+  background: #E8805F;
+  color: #fff;
+}
+
+.custom-alert-buttons button:hover {
+  opacity: 0.85;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

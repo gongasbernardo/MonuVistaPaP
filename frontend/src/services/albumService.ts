@@ -44,9 +44,11 @@ function getHeaders() {
 }
 
 function mapMonument(m: any): AlbumMonument {
+  const fid = m.folderId?._id || m.folderId;
   return {
     ...m,
     id: m._id,
+    folderId: fid,
     addedAt: m.createdAt,
     visitInfo: {
       visited: m.visited,
