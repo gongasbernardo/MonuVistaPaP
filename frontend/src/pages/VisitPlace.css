@@ -1,0 +1,470 @@
+/* ========================================
+   VISIT PLACE PAGE - AI POWERED
+   ======================================== */
+
+.visit-header {
+  --background: linear-gradient(135deg, #E8805F 0%, #D95F3D 100%);
+  box-shadow: 0 4px 12px rgba(232, 128, 95, 0.2);
+}
+
+.visit-header ion-title {
+  color: white;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.visit-content {
+  --background: #FAFBFC;
+  padding-bottom: 90px;
+}
+
+/* ========================================
+   AI BANNER
+   ======================================== */
+
+.ai-banner {
+  background: linear-gradient(135deg, #E8805F 0%, #D95F3D 100%);
+  color: white;
+  padding: 32px 24px;
+  text-align: center;
+  border-radius: 0 0 24px 24px;
+  box-shadow: 0 8px 24px rgba(232, 128, 95, 0.25);
+  margin-bottom: 24px;
+}
+
+.ai-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1) rotate(5deg);
+    opacity: 0.8;
+  }
+}
+
+.ai-banner h2 {
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.5px;
+}
+
+.ai-banner p {
+  font-size: 14px;
+  opacity: 0.95;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ========================================
+   UPLOAD SECTION
+   ======================================== */
+
+.upload-section {
+  padding: 0 24px;
+}
+
+.camera-prompt {
+  text-align: center;
+  padding: 48px 24px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.camera-icon {
+  font-size: 72px;
+  color: #E8805F;
+  margin-bottom: 16px;
+  opacity: 0.9;
+}
+
+.camera-prompt h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 8px 0;
+}
+
+.camera-prompt p {
+  font-size: 14px;
+  color: #6B7280;
+  margin: 0 0 24px 0;
+}
+
+.camera-button {
+  --background: linear-gradient(135deg, #E8805F 0%, #D95F3D 100%);
+  --background-activated: linear-gradient(135deg, #D95F3D 0%, #C94E2E 100%);
+  --border-radius: 12px;
+  --box-shadow: 0 8px 20px rgba(232, 128, 95, 0.3);
+  height: 52px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+
+/* ========================================
+   PREVIEW SECTION
+   ======================================== */
+
+.preview-section {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.image-preview-container {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.preview-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  max-height: 400px;
+  object-fit: cover;
+}
+
+.remove-image {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.remove-image ion-icon {
+  font-size: 24px;
+  color: white;
+}
+
+.remove-image:hover {
+  background: rgba(220, 38, 38, 0.9);
+  transform: scale(1.1);
+}
+
+.analyze-button {
+  --background: linear-gradient(135deg, #E8805F 0%, #D95F3D 100%);
+  --background-activated: linear-gradient(135deg, #D95F3D 0%, #C94E2E 100%);
+  --border-radius: 12px;
+  --box-shadow: 0 8px 20px rgba(232, 128, 95, 0.3);
+  height: 52px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.retake-button {
+  --border-radius: 12px;
+  --border-color: #E8805F;
+  --color: #E8805F;
+  height: 48px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* ========================================
+   RESULT SECTION
+   ======================================== */
+
+.result-section {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.result-image {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.result-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.confidence-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: linear-gradient(135deg, #E8805F 0%, #D95F3D 100%);
+  color: white;
+  padding: 10px 16px;
+  border-radius: 24px;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(232, 128, 95, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.confidence-badge ion-icon {
+  font-size: 18px;
+}
+
+/* ========================================
+   MONUMENT INFO
+   ======================================== */
+
+.monument-info {
+  padding: 0 24px 24px 24px;
+}
+
+.monument-name {
+  font-size: 28px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 16px 0;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.info-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.location-tag {
+  color: #E8805F;
+}
+
+.location-tag ion-icon {
+  color: #E8805F;
+}
+
+.time-tag {
+  color: #6B7280;
+}
+
+.time-tag ion-icon {
+  color: #6B7280;
+}
+
+.style-tag {
+  background: linear-gradient(135deg, #E8805F 0%, #D95F3D 100%);
+  color: white;
+}
+
+/* ========================================
+   INFO CARDS
+   ======================================== */
+
+.info-card {
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+}
+
+.info-card ion-card-content {
+  padding: 20px;
+}
+
+.info-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #E8805F;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-section h3 ion-icon {
+  font-size: 20px;
+}
+
+.info-section p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #374151;
+  margin: 0;
+}
+
+.fun-facts {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.fun-facts li {
+  position: relative;
+  padding-left: 24px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #374151;
+}
+
+.fun-facts li:last-child {
+  margin-bottom: 0;
+}
+
+.fun-facts li::before {
+  content: "✨";
+  position: absolute;
+  left: 0;
+  font-size: 16px;
+}
+
+/* ========================================
+   ACTION BUTTONS
+   ======================================== */
+
+.new-search-button {
+  --background: linear-gradient(135deg, #E8805F 0%, #D95F3D 100%);
+  --background-activated: linear-gradient(135deg, #D95F3D 0%, #C94E2E 100%);
+  --border-radius: 12px;
+  --box-shadow: 0 8px 20px rgba(232, 128, 95, 0.3);
+  height: 52px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+
+.add-album-button {
+  --border-radius: 12px;
+  height: 52px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.already-added {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  background: #D1FAE5;
+  border: 2px solid #10B981;
+  border-radius: 12px;
+  color: #065F46;
+  font-weight: 700;
+  font-size: 15px;
+  margin-top: 12px;
+}
+
+.already-added ion-icon {
+  font-size: 24px;
+  color: #10B981;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 768px) {
+  .monument-name {
+    font-size: 24px;
+  }
+
+  .result-image {
+    height: 250px;
+  }
+
+  .ai-banner h2 {
+    font-size: 20px;
+  }
+
+  .ai-banner p {
+    font-size: 13px;
+  }
+
+  .info-tags {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tag {
+    width: fit-content;
+  }
+}
+
+@media (max-width: 480px) {
+  .monument-name {
+    font-size: 22px;
+  }
+
+  .result-image {
+    height: 220px;
+  }
+
+  .camera-icon {
+    font-size: 56px;
+  }
+
+  .camera-prompt h3 {
+    font-size: 18px;
+  }
+
+  .confidence-badge {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+}

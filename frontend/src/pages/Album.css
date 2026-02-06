@@ -1,0 +1,600 @@
+/* ========================================
+   ALBUM PAGE - MONUMENTS COLLECTION
+   ======================================== */
+
+.album-header {
+  --background: linear-gradient(135deg, #E8805F 0%, #D95F3D 100%);
+  box-shadow: 0 4px 12px rgba(232, 128, 95, 0.2);
+}
+
+.album-header ion-title {
+  color: white;
+  font-weight: 700;
+}
+
+.album-content {
+  --background: #FAFBFC;
+  padding: 20px;
+  padding-bottom: 90px;
+}
+
+/* ========================================
+   STATS SECTION
+   ======================================== */
+
+.album-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px 12px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 2px solid transparent;
+}
+
+.stat-card.visited {
+  border-color: #10B981;
+  background: linear-gradient(135deg, #D1FAE5 0%, #ECFDF5 100%);
+}
+
+.stat-card.tovisit {
+  border-color: #F59E0B;
+  background: linear-gradient(135deg, #FEF3C7 0%, #FFFBEB 100%);
+}
+
+.stat-card .stat-number {
+  display: block;
+  font-size: 24px;
+  font-weight: 800;
+  color: #E8805F;
+  margin-bottom: 4px;
+}
+
+.stat-card.visited .stat-number {
+  color: #10B981;
+}
+
+.stat-card.tovisit .stat-number {
+  color: #F59E0B;
+}
+
+.stat-card .stat-label {
+  display: block;
+  font-size: 11px;
+  color: #6B7280;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* ========================================
+   FOLDER TABS
+   ======================================== */
+
+.folder-tabs {
+  margin-bottom: 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabs-scroll {
+  display: flex;
+  gap: 8px;
+  padding-bottom: 8px;
+}
+
+.folder-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: white;
+  border: 2px solid #E5E7EB;
+  border-bottom: 3px solid transparent;
+  border-radius: 10px 10px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6B7280;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.folder-tab ion-icon {
+  font-size: 18px;
+}
+
+.folder-tab.active {
+  background: linear-gradient(135deg, #E8805F 0%, #D95F3D 100%);
+  color: white;
+  border-color: #E8805F;
+  border-bottom-color: #E8805F;
+  box-shadow: 0 4px 12px rgba(232, 128, 95, 0.3);
+}
+
+.folder-tab.active ion-icon {
+  color: white;
+}
+
+/* ========================================
+   FILTER SEGMENT
+   ======================================== */
+
+.filter-segment {
+  margin-bottom: 20px;
+  background: white;
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.filter-segment ion-segment {
+  --background: transparent;
+}
+
+.filter-segment ion-segment-button {
+  --color: #6B7280;
+  --color-checked: white;
+  --background-checked: linear-gradient(135deg, #E8805F 0%, #D95F3D 100%);
+  --indicator-color: transparent;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  min-height: 36px;
+}
+
+.filter-segment ion-icon {
+  font-size: 16px;
+  margin-right: 4px;
+}
+
+/* ========================================
+   MONUMENTS GRID
+   ======================================== */
+
+.no-monuments {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6B7280;
+}
+
+.no-monuments ion-icon {
+  font-size: 64px;
+  color: #D1D5DB;
+  margin-bottom: 16px;
+}
+
+.no-monuments p {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.no-monuments-subtitle {
+  font-size: 13px;
+  font-weight: 400;
+  color: #9CA3AF;
+}
+
+.monuments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.monument-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.monument-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.monument-image {
+  position: relative;
+  aspect-ratio: 3/4;
+  overflow: hidden;
+}
+
+.monument-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.status-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.status-badge.visited {
+  background: rgba(16, 185, 129, 0.95);
+  color: white;
+}
+
+.status-badge.tovisit {
+  background: rgba(245, 158, 11, 0.95);
+  color: white;
+}
+
+.status-badge ion-icon {
+  font-size: 14px;
+}
+
+.monument-info {
+  padding: 12px;
+}
+
+.monument-info h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 6px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.monument-location {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #6B7280;
+  margin: 0 0 4px 0;
+}
+
+.monument-location ion-icon {
+  font-size: 14px;
+}
+
+.visit-date {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #10B981;
+  font-weight: 600;
+  margin: 0;
+}
+
+.visit-date ion-icon {
+  font-size: 13px;
+}
+
+/* ========================================
+   MODAL
+   ======================================== */
+
+.monument-modal .modal-content {
+  --background: #FAFBFC;
+}
+
+.modal-image {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-body h1 {
+  font-size: 24px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 16px 0;
+}
+
+.modal-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.modal-tags .tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  color: #E8805F;
+}
+
+.modal-tags .tag ion-icon {
+  font-size: 16px;
+}
+
+.visit-info-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(135deg, #D1FAE5 0%, #ECFDF5 100%);
+  border: 2px solid #10B981;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.visit-info-card ion-icon {
+  font-size: 32px;
+  color: #10B981;
+}
+
+.visit-info-card strong {
+  display: block;
+  font-size: 14px;
+  color: #065F46;
+  margin-bottom: 4px;
+}
+
+.visit-info-card p {
+  font-size: 13px;
+  color: #059669;
+  margin: 0;
+  font-weight: 600;
+}
+
+.info-section {
+  margin-bottom: 20px;
+}
+
+.info-section h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #E8805F;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 12px 0;
+}
+
+.info-section p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #374151;
+  margin: 0;
+}
+
+.modal-actions {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-actions ion-button {
+  --border-radius: 12px;
+  height: 48px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+  .album-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .monuments-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .modal-image {
+    height: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .folder-tab {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  .stat-card .stat-number {
+    font-size: 20px;
+  }
+
+  .stat-card .stat-label {
+    font-size: 10px;
+  }
+}
+
+/* ========================================
+   NO POSTS STATE
+   ======================================== */
+
+.no-posts {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6B7280;
+}
+
+.no-posts ion-icon {
+  font-size: 64px;
+  color: #D1D5DB;
+  margin-bottom: 16px;
+}
+
+.no-posts p {
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 8px 0;
+}
+
+.no-posts-subtitle {
+  font-size: 14px;
+  color: #9CA3AF;
+  font-weight: 400;
+}
+
+/* ========================================
+   ALBUM GRID
+   ======================================== */
+
+.album-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.album-item {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid #E5E7EB;
+}
+
+.album-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+}
+
+.album-image {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+}
+
+.album-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.album-item:hover .album-image img {
+  transform: scale(1.05);
+}
+
+.album-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  padding: 16px;
+  color: white;
+  opacity: 0;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.album-item:hover .album-overlay {
+  opacity: 1;
+}
+
+.album-overlay h4 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: white;
+}
+
+.album-stats-overlay {
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
+}
+
+.album-stats-overlay span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.album-stats-overlay ion-icon {
+  font-size: 16px;
+}
+
+.album-info {
+  padding: 16px;
+}
+
+.album-info h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1F2937;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.2px;
+}
+
+.album-location {
+  font-size: 13px;
+  color: #6B7280;
+  margin: 0 0 4px 0;
+  font-weight: 500;
+}
+
+.album-date {
+  font-size: 12px;
+  color: #9CA3AF;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 768px) {
+  .album-content {
+    padding: 16px;
+  }
+
+  .album-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+  }
+
+  .album-stats {
+    gap: 12px;
+  }
+
+  .stat-card {
+    padding: 16px 12px;
+  }
+
+  .stat-card .stat-number {
+    font-size: 24px;
+  }
+
+  .stat-card .stat-label {
+    font-size: 11px;
+  }
+}

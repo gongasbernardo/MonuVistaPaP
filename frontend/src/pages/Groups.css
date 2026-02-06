@@ -1,0 +1,299 @@
+.groups-segment {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.groups-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.group-card {
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.group-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.group-header {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+}
+
+.group-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.group-info {
+  flex: 1;
+}
+
+.group-info h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.group-stats {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.group-stats span {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.group-stats ion-icon {
+  margin-right: 0.3rem;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
+  text-align: center;
+  color: #999;
+}
+
+.empty-state ion-icon {
+  font-size: 4rem;
+  color: #ddd;
+  margin-bottom: 1rem;
+}
+
+.empty-state .subtitle {
+  font-size: 0.9rem;
+  color: #aaa;
+  margin-top: 0.5rem;
+}
+
+/* Group Detail Modal */
+.group-detail {
+  padding: 1rem;
+}
+
+.group-detail-image {
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.group-detail-info {
+  margin-bottom: 2rem;
+}
+
+.group-detail-info h2 {
+  margin: 0 0 0.5rem 0;
+}
+
+.group-detail-info p {
+  color: #666;
+  margin: 0.5rem 0;
+}
+
+.detail-stats {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--ion-color-primary);
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 0.3rem;
+}
+
+.section {
+  margin-bottom: 2rem;
+}
+
+.section h3 {
+  margin: 1rem 0 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.messages-list {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+
+.message-item {
+  padding: 0.8rem;
+  border-bottom: 1px solid #eee;
+}
+
+.message-item:last-child {
+  border-bottom: none;
+}
+
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.message-header strong {
+  color: var(--ion-color-primary);
+}
+
+.message-header small {
+  color: #999;
+  font-size: 0.75rem;
+}
+
+.message-item p {
+  margin: 0.5rem 0 0 0;
+  line-height: 1.4;
+}
+
+.empty-text {
+  text-align: center;
+  color: #999;
+  padding: 1rem;
+  font-size: 0.9rem;
+}
+
+.message-input {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.message-input ion-input {
+  flex: 1;
+}
+
+.shared-content-list {
+  margin-bottom: 1rem;
+}
+
+.shared-item {
+  margin-bottom: 1rem;
+}
+
+.shared-item img {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+}
+
+.share-form {
+  background-color: #f5f5f5;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.share-form h4 {
+  margin-top: 0;
+}
+
+.share-form ion-input,
+.share-form ion-textarea {
+  margin-bottom: 0.5rem;
+  background-color: white;
+  border-radius: 4px;
+}
+
+.image-picker-button {
+  margin-top: 0.5rem;
+}
+
+.image-preview {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 480px) {
+  .group-header {
+    flex-direction: column;
+  }
+
+  .group-image {
+    width: 100%;
+    height: auto;
+  }
+
+  .detail-stats {
+    flex-wrap: wrap;
+  }
+}
+/* Tags and Meta */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.tag {
+  display: inline-block;
+  background-color: var(--ion-color-primary);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.group-meta {
+  margin-bottom: 0.5rem;
+}
+
+.private-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background-color: #ff6b6b;
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.private-badge ion-icon {
+  font-size: 0.9rem;
+}
