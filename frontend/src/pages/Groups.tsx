@@ -86,6 +86,11 @@ const Groups: React.FC = () => {
   const [notificationMessage, setNotificationMessage] = useState("");
   const [showNotification, setShowNotification] = useState(false);
   const [showMembersModal, setShowMembersModal] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const messagesListRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isNearBottomRef = useRef(true);
 
   const createModalRef = useRef<HTMLIonModalElement>(null);
   const passwordModalRef = useRef<HTMLIonModalElement>(null);
@@ -143,6 +148,11 @@ const Groups: React.FC = () => {
           if (!prev || prev._id !== data.groupId) return prev;
           return { ...prev, messages: [...prev.messages, data.message] };
         });
+        if (isNearBottomRef.current) {
+          setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+        } else {
+          setUnreadCount((prev) => prev + 1);
+        }
       }
     };
 
@@ -499,6 +509,8 @@ const Groups: React.FC = () => {
         )
       );
       setMessage("");
+      setUnreadCount(0);
+      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
     } catch (error) {
       console.error("Error sending message:", error);
       alert("Erro ao enviar mensagem");
@@ -615,7 +627,11 @@ const Groups: React.FC = () => {
     setEditGroupIsPrivate(Boolean(group.isPrivate));
     setEditGroupPassword("");
     setIsEditingGroup(false);
+    setUnreadCount(0);
+    isNearBottomRef.current = true;
     openDetailModal();
+    // Scroll to bottom once the modal content renders
+    setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'auto' }), 300);
   };
 
   if (loading) {
@@ -1057,9 +1073,19 @@ const Groups: React.FC = () => {
                 })()}
 
                 {/* Messages Section */}
-                <div className="section">
+                <div className="section" style={{ position: 'relative' }}>
                   <h3>Mensagens ({selectedGroup.messages.length})</h3>
-                  <div className="messages-list">
+                  <div
+                    className="messages-list"
+                    ref={messagesListRef}
+                    onScroll={() => {
+                      const el = messagesListRef.current;
+                      if (!el) return;
+                      const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
+                      isNearBottomRef.current = atBottom;
+                      if (atBottom) setUnreadCount(0);
+                    }}
+                  >
                     {selectedGroup.messages.length === 0 ? (
                       <p className="empty-text">Nenhuma mensagem ainda</p>
                     ) : (
@@ -1077,7 +1103,19 @@ const Groups: React.FC = () => {
                         </div>
                       ))
                     )}
+                    <div ref={messagesEndRef} />
                   </div>
+                  {unreadCount > 0 && (
+                    <div
+                      className="new-messages-badge"
+                      onClick={() => {
+                        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+                        setUnreadCount(0);
+                      }}
+                    >
+                      {unreadCount} {unreadCount === 1 ? 'nova mensagem' : 'novas mensagens'} ↓
+                    </div>
+                  )}
 
                   <div className="message-input">
                     <IonInput

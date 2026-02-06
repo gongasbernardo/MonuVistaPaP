@@ -185,6 +185,33 @@
   line-height: 1.4;
 }
 
+.new-messages-badge {
+  position: absolute;
+  bottom: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ion-color-primary, #3880ff);
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  z-index: 10;
+  user-select: none;
+  animation: badge-bounce 0.3s ease;
+}
+
+.new-messages-badge:hover {
+  opacity: 0.9;
+}
+
+@keyframes badge-bounce {
+  0% { transform: translateX(-50%) translateY(10px); opacity: 0; }
+  100% { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+
 .empty-text {
   text-align: center;
   color: #999;
