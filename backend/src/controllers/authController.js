@@ -172,6 +172,115 @@ exports.login = async (req, res) => {
   }
 };
 
+// Update profile (protected route)
+exports.updateProfile = async (req, res) => {
+  try {
+    const { name, email, password, currentPassword, avatar } = req.body;
+
+    if (isMongoConnected()) {
+      const user = await User.findById(req.user.id).select('+password');
+
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'Utilizador não encontrado' });
+      }
+
+      if (name) user.name = name;
+      if (avatar !== undefined) user.avatar = avatar;
+
+      if (email && email !== user.email) {
+        const existing = await User.findOne({ email });
+        if (existing) {
+          return res.status(400).json({ success: false, message: 'Este email já está em uso' });
+        }
+        user.email = email;
+      }
+
+      if (password) {
+        if (!currentPassword) {
+          return res.status(400).json({ success: false, message: 'Introduz a palavra-passe atual' });
+        }
+        const bcrypt = require('bcryptjs');
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+          return res.status(400).json({ success: false, message: 'Palavra-passe atual incorreta' });
+        }
+        if (password.length < 6) {
+          return res.status(400).json({ success: false, message: 'A palavra-passe deve ter pelo menos 6 caracteres' });
+        }
+        user.password = password;
+      }
+
+      await user.save();
+
+      res.status(200).json({
+        success: true,
+        message: 'Perfil atualizado com sucesso',
+        user: {
+          id: user._id,
+          email: user.email,
+          name: user.name,
+          avatar: user.avatar || ''
+        }
+      });
+    } else {
+      // File storage fallback
+      const users = fileStorage.readUsers();
+      const userIndex = users.findIndex(u => u._id === req.user.id);
+      if (userIndex === -1) {
+        return res.status(404).json({ success: false, message: 'Utilizador não encontrado' });
+      }
+
+      const user = users[userIndex];
+      if (name) user.name = name;
+      if (avatar !== undefined) user.avatar = avatar;
+
+      if (email && email !== user.email) {
+        const existing = users.find(u => u.email === email && u._id !== user._id);
+        if (existing) {
+          return res.status(400).json({ success: false, message: 'Este email já está em uso' });
+        }
+        user.email = email;
+      }
+
+      if (password) {
+        if (!currentPassword) {
+          return res.status(400).json({ success: false, message: 'Introduz a palavra-passe atual' });
+        }
+        const bcrypt = require('bcryptjs');
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+          return res.status(400).json({ success: false, message: 'Palavra-passe atual incorreta' });
+        }
+        if (password.length < 6) {
+          return res.status(400).json({ success: false, message: 'A palavra-passe deve ter pelo menos 6 caracteres' });
+        }
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(password, salt);
+      }
+
+      users[userIndex] = user;
+      fileStorage.saveUsers(users);
+
+      res.status(200).json({
+        success: true,
+        message: 'Perfil atualizado com sucesso',
+        user: {
+          id: user._id,
+          email: user.email,
+          name: user.name,
+          avatar: user.avatar || ''
+        }
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Erro ao atualizar perfil',
+      error: error.message
+    });
+  }
+};
+
 // Get current user (protected route)
 exports.getMe = async (req, res) => {
   try {
