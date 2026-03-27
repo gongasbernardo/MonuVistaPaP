@@ -2,6 +2,7 @@ const User = require('../models/User');
 const Post = require('../models/Post');
 const Group = require('../models/Group');
 const AlbumMonument = require('../models/AlbumMonument');
+const Challenge = require('../models/Challenge');
 
 // XP thresholds for levels
 const LEVEL_THRESHOLDS = [
@@ -40,7 +41,18 @@ exports.getUserStats = async (req, res) => {
     const totalDiscoveries = monumentsCount;
 
     // Recalculate XP: 50 per post, 30 per discovery, 20 per group joined
-    const calculatedXp = (postsCount * 50) + (totalDiscoveries * 30) + (groupsCount * 20);
+    let calculatedXp = (postsCount * 50) + (totalDiscoveries * 30) + (groupsCount * 20);
+
+    // Add XP from completed challenges
+    const completedChallenges = await Challenge.find({
+      active: true,
+      'participants': {
+        $elemMatch: { userId, completed: true }
+      }
+    });
+    for (const ch of completedChallenges) {
+      calculatedXp += ch.reward?.xp || 0;
+    }
 
     // Update user if needed
     const levelInfo = calculateLevel(calculatedXp);

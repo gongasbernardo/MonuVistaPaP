@@ -38,6 +38,7 @@ import {
 import axios from "axios";
 import { io, Socket } from "socket.io-client";
 import { API_URL } from "../config";
+import challengeService from "../services/challengeService";
 import BottomNav from "../components/BottomNav";
 import "./Groups.css";
 
@@ -422,6 +423,8 @@ const Groups: React.FC = () => {
       setUserGroups([response.data.group, ...userGroups]);
       fetchGroups();
       alert("Entrou no grupo com sucesso!");
+      // Sync challenge progress (groups challenge)
+      challengeService.syncProgress().catch(() => {});
     } catch (error) {
       console.error("Error joining group:", error);
       alert("Erro ao entrar no grupo");
@@ -450,6 +453,8 @@ const Groups: React.FC = () => {
       closePasswordModal();
       setPendingGroupId("");
       alert("Entrou no grupo com sucesso!");
+      // Sync challenge progress (groups challenge)
+      challengeService.syncProgress().catch(() => {});
     } catch (error: any) {
       console.error("Error joining group:", error);
       alert(

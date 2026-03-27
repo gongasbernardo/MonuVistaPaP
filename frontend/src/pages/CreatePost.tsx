@@ -17,6 +17,7 @@ import { arrowBackOutline, imageOutline } from "ionicons/icons";
 import { useHistory } from "react-router-dom";
 import axios from "axios";
 import authService from "../services/authService";
+import challengeService from "../services/challengeService";
 import { API_URL } from "../config";
 import { COUNTRIES, REGIONS_BY_COUNTRY } from "../constants/locations";
 import BottomNav from "../components/BottomNav";
@@ -90,6 +91,8 @@ const CreatePost = () => {
       );
 
       if (response.data.success) {
+        // Sync challenge progress (posts challenge)
+        await challengeService.syncProgress().catch(() => {});
         // Redirect to community or home
         history.push("/home");
       }

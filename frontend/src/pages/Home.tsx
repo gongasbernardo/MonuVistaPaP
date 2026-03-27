@@ -1,48 +1,205 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import {
   IonPage,
   IonHeader,
   IonToolbar,
   IonTitle,
   IonContent,
-  IonButton,
   IonIcon,
-  IonLoading,
-  IonSegment,
-  IonSegmentButton,
-  IonInput,
 } from "@ionic/react";
 import {
-  cameraOutline,
   trophyOutline,
   locationOutline,
-  heartOutline,
-  heartSharp,
-  chatbubbleOutline,
-  sendOutline,
-  chevronDownOutline,
-  chevronUpOutline,
 } from "ionicons/icons";
+import "leaflet/dist/leaflet.css";
 import authService from "../services/authService";
+import challengeService from "../services/challengeService";
 import axios from "axios";
 import { API_URL } from "../config";
-import { COUNTRIES } from "../constants/locations";
 import BottomNav from "../components/BottomNav";
 import "./Home.css";
 
-interface Post {
-  _id: string;
-  title: string;
-  description: string;
-  image: string;
+// Lazy-loaded map component for performance
+const MonumentMap = lazy(() => import("../components/MonumentMap"));
+
+interface MapMonument {
+  name: string;
   location: string;
   country: string;
-  region: string;
-  userName: string;
-  likes: any[];
-  comments: any[];
-  createdAt: string;
+  lat: number;
+  lng: number;
+  century: string;
+  style: string;
 }
+
+const MAP_MONUMENTS: MapMonument[] = [
+  // ========== PORTUGAL CONTINENTAL ==========
+  // Lisboa e arredores
+  { name: "Torre de Belém", location: "Lisboa", country: "Portugal", lat: 38.6916, lng: -9.2160, century: "XVI", style: "Manuelino" },
+  { name: "Mosteiro dos Jerónimos", location: "Lisboa", country: "Portugal", lat: 38.6979, lng: -9.2057, century: "XVI", style: "Manuelino" },
+  { name: "Castelo de São Jorge", location: "Lisboa", country: "Portugal", lat: 38.7139, lng: -9.1334, century: "XI", style: "Medieval" },
+  { name: "Aqueduto das Águas Livres", location: "Lisboa", country: "Portugal", lat: 38.7330, lng: -9.1700, century: "XVIII", style: "Barroco" },
+  { name: "Panteão Nacional", location: "Lisboa", country: "Portugal", lat: 38.7148, lng: -9.1246, century: "XVII", style: "Barroco" },
+  { name: "Elevador de Santa Justa", location: "Lisboa", country: "Portugal", lat: 38.7121, lng: -9.1393, century: "XX", style: "Neo-Gótico" },
+  { name: "Basílica da Estrela", location: "Lisboa", country: "Portugal", lat: 38.7138, lng: -9.1597, century: "XVIII", style: "Barroco/Neoclássico" },
+  { name: "Convento do Carmo", location: "Lisboa", country: "Portugal", lat: 38.7126, lng: -9.1406, century: "XIV", style: "Gótico" },
+  { name: "Palácio da Ajuda", location: "Lisboa", country: "Portugal", lat: 38.7053, lng: -9.1959, century: "XIX", style: "Neoclássico" },
+  { name: "Palácio de Queluz", location: "Queluz", country: "Portugal", lat: 38.7508, lng: -9.2590, century: "XVIII", style: "Rococó" },
+  { name: "Palácio de Mafra", location: "Mafra", country: "Portugal", lat: 38.9368, lng: -9.3265, century: "XVIII", style: "Barroco" },
+  // Sintra
+  { name: "Palácio da Pena", location: "Sintra", country: "Portugal", lat: 38.7876, lng: -9.3907, century: "XIX", style: "Romântico" },
+  { name: "Castelo dos Mouros", location: "Sintra", country: "Portugal", lat: 38.7928, lng: -9.3892, century: "VIII", style: "Mourisco" },
+  { name: "Palácio Nacional de Sintra", location: "Sintra", country: "Portugal", lat: 38.7975, lng: -9.3907, century: "XIV", style: "Medieval/Manuelino" },
+  { name: "Quinta da Regaleira", location: "Sintra", country: "Portugal", lat: 38.7963, lng: -9.3958, century: "XX", style: "Neomanuelino" },
+  { name: "Palácio de Monserrate", location: "Sintra", country: "Portugal", lat: 38.7914, lng: -9.4199, century: "XIX", style: "Romântico/Neogótico" },
+  // Porto e Norte
+  { name: "Torre dos Clérigos", location: "Porto", country: "Portugal", lat: 41.1458, lng: -8.6146, century: "XVIII", style: "Barroco" },
+  { name: "Ponte Dom Luís I", location: "Porto", country: "Portugal", lat: 41.1403, lng: -8.6094, century: "XIX", style: "Ferro" },
+  { name: "Sé do Porto", location: "Porto", country: "Portugal", lat: 41.1430, lng: -8.6113, century: "XII", style: "Românico" },
+  { name: "Estação de São Bento", location: "Porto", country: "Portugal", lat: 41.1455, lng: -8.6103, century: "XX", style: "Beaux-Arts" },
+  { name: "Igreja de São Francisco", location: "Porto", country: "Portugal", lat: 41.1410, lng: -8.6158, century: "XIV", style: "Gótico/Barroco" },
+  { name: "Palácio da Bolsa", location: "Porto", country: "Portugal", lat: 41.1413, lng: -8.6155, century: "XIX", style: "Neoclássico" },
+  { name: "Castelo de Guimarães", location: "Guimarães", country: "Portugal", lat: 41.4478, lng: -8.2904, century: "X", style: "Medieval" },
+  { name: "Paço dos Duques de Bragança", location: "Guimarães", country: "Portugal", lat: 41.4475, lng: -8.2905, century: "XV", style: "Senhorial" },
+  { name: "Sé de Braga", location: "Braga", country: "Portugal", lat: 41.5501, lng: -8.4270, century: "XI", style: "Românico" },
+  { name: "Bom Jesus do Monte", location: "Braga", country: "Portugal", lat: 41.5547, lng: -8.3768, century: "XVIII", style: "Barroco" },
+  { name: "Citânia de Briteiros", location: "Guimarães", country: "Portugal", lat: 41.5258, lng: -8.3153, century: "I a.C.", style: "Castreja" },
+  { name: "Mosteiro de Tibães", location: "Braga", country: "Portugal", lat: 41.5755, lng: -8.4578, century: "XI", style: "Barroco" },
+  { name: "Castelo de Bragança", location: "Bragança", country: "Portugal", lat: 41.8062, lng: -6.7513, century: "XII", style: "Medieval" },
+  { name: "Domus Municipalis", location: "Bragança", country: "Portugal", lat: 41.8057, lng: -6.7506, century: "XII", style: "Românico" },
+  { name: "Ponte de Lima — Ponte Romana", location: "Ponte de Lima", country: "Portugal", lat: 41.7680, lng: -8.5836, century: "I", style: "Romano" },
+  { name: "Igreja de São Gonçalo", location: "Amarante", country: "Portugal", lat: 41.2718, lng: -8.0818, century: "XVI", style: "Renascença/Barroco" },
+  { name: "Castelo de Chaves", location: "Chaves", country: "Portugal", lat: 41.7396, lng: -7.4712, century: "XIV", style: "Medieval" },
+  { name: "Mosteiro de Leça do Balio", location: "Matosinhos", country: "Portugal", lat: 41.2055, lng: -8.6193, century: "XII", style: "Românico/Gótico" },
+  { name: "Forte de São João Baptista", location: "Vila do Conde", country: "Portugal", lat: 41.3540, lng: -8.7479, century: "XVI", style: "Militar" },
+  // Centro
+  { name: "Universidade de Coimbra", location: "Coimbra", country: "Portugal", lat: 40.2074, lng: -8.4260, century: "XIII", style: "Barroco" },
+  { name: "Sé Velha de Coimbra", location: "Coimbra", country: "Portugal", lat: 40.2088, lng: -8.4280, century: "XII", style: "Românico" },
+  { name: "Mosteiro de Santa Clara-a-Velha", location: "Coimbra", country: "Portugal", lat: 40.2031, lng: -8.4348, century: "XIII", style: "Gótico" },
+  { name: "Convento de Cristo", location: "Tomar", country: "Portugal", lat: 39.6036, lng: -8.4189, century: "XII", style: "Templário" },
+  { name: "Castelo de Almourol", location: "Vila Nova da Barquinha", country: "Portugal", lat: 39.4614, lng: -8.3838, century: "XII", style: "Templário" },
+  { name: "Castelo de Óbidos", location: "Óbidos", country: "Portugal", lat: 39.3622, lng: -9.1571, century: "XII", style: "Medieval" },
+  { name: "Ruínas de Conímbriga", location: "Condeixa-a-Nova", country: "Portugal", lat: 40.0981, lng: -8.4911, century: "I a.C.", style: "Romano" },
+  { name: "Mosteiro da Batalha", location: "Batalha", country: "Portugal", lat: 39.6601, lng: -8.8244, century: "XIV", style: "Gótico" },
+  { name: "Mosteiro de Alcobaça", location: "Alcobaça", country: "Portugal", lat: 39.5485, lng: -8.9787, century: "XII", style: "Gótico Cisterciense" },
+  { name: "Castelo de Leiria", location: "Leiria", country: "Portugal", lat: 39.7463, lng: -8.8071, century: "XII", style: "Medieval" },
+  { name: "Sé da Guarda", location: "Guarda", country: "Portugal", lat: 40.5366, lng: -7.2672, century: "XIV", style: "Gótico" },
+  { name: "Castelo de Monsanto", location: "Monsanto", country: "Portugal", lat: 40.0389, lng: -7.1128, century: "XII", style: "Medieval" },
+  { name: "Castelo de Marvão", location: "Marvão", country: "Portugal", lat: 39.3936, lng: -7.3766, century: "XIII", style: "Medieval" },
+  { name: "Vila Romana do Rabaçal", location: "Penela", country: "Portugal", lat: 40.0300, lng: -8.3833, century: "IV", style: "Romano" },
+  { name: "Castelo de Sortelha", location: "Sortelha", country: "Portugal", lat: 40.3277, lng: -7.2105, century: "XIII", style: "Medieval" },
+  { name: "Aldeia Histórica de Piódão", location: "Arganil", country: "Portugal", lat: 40.2286, lng: -7.8314, century: "XVII", style: "Tradicional" },
+  { name: "Sé de Viseu", location: "Viseu", country: "Portugal", lat: 40.6612, lng: -7.9136, century: "XII", style: "Românico/Manuelino" },
+  { name: "Castelo de Pombal", location: "Pombal", country: "Portugal", lat: 39.9142, lng: -8.6280, century: "XII", style: "Templário" },
+  { name: "Castelo Rodrigo", location: "Figueira de Castelo Rodrigo", country: "Portugal", lat: 40.8777, lng: -6.9637, century: "XIII", style: "Medieval" },
+  { name: "Castelo de Trancoso", location: "Trancoso", country: "Portugal", lat: 40.7788, lng: -7.3504, century: "X", style: "Medieval" },
+  // Alentejo
+  { name: "Sé de Évora", location: "Évora", country: "Portugal", lat: 38.5714, lng: -7.9068, century: "XIII", style: "Gótico" },
+  { name: "Templo Romano de Évora", location: "Évora", country: "Portugal", lat: 38.5730, lng: -7.9073, century: "I", style: "Romano" },
+  { name: "Capela dos Ossos", location: "Évora", country: "Portugal", lat: 38.5693, lng: -7.9087, century: "XVI", style: "Renascença" },
+  { name: "Cromeleque dos Almendres", location: "Évora", country: "Portugal", lat: 38.5557, lng: -8.0593, century: "V milénio a.C.", style: "Megalítico" },
+  { name: "Castelo de Estremoz", location: "Estremoz", country: "Portugal", lat: 38.8425, lng: -7.5886, century: "XIII", style: "Medieval" },
+  { name: "Castelo de Arraiolos", location: "Arraiolos", country: "Portugal", lat: 38.7252, lng: -7.9864, century: "XIV", style: "Medieval" },
+  { name: "Castelo de Monsaraz", location: "Monsaraz", country: "Portugal", lat: 38.4429, lng: -7.3804, century: "XIII", style: "Medieval" },
+  { name: "Fortaleza de Elvas", location: "Elvas", country: "Portugal", lat: 38.8803, lng: -7.1628, century: "XVII", style: "Militar/Vauban" },
+  { name: "Castelo de Beja", location: "Beja", country: "Portugal", lat: 38.0153, lng: -7.8615, century: "XIII", style: "Medieval" },
+  { name: "Ponte Romana de Alter do Chão", location: "Alter do Chão", country: "Portugal", lat: 39.1989, lng: -7.6575, century: "II", style: "Romano" },
+  { name: "Castelo de Viana do Alentejo", location: "Viana do Alentejo", country: "Portugal", lat: 38.3364, lng: -8.0001, century: "XIII", style: "Medieval" },
+  // Algarve
+  { name: "Castelo de Silves", location: "Silves", country: "Portugal", lat: 37.1891, lng: -8.4388, century: "VIII", style: "Mourisco" },
+  { name: "Fortaleza de Sagres", location: "Sagres", country: "Portugal", lat: 36.9934, lng: -8.9509, century: "XV", style: "Militar" },
+  { name: "Igreja de São Lourenço", location: "Almancil", country: "Portugal", lat: 37.0765, lng: -8.0190, century: "XVIII", style: "Barroco/Azulejos" },
+  { name: "Forte de São João do Arade", location: "Ferragudo", country: "Portugal", lat: 37.1190, lng: -8.5260, century: "XVI", style: "Militar" },
+  { name: "Castelo de Tavira", location: "Tavira", country: "Portugal", lat: 37.1268, lng: -7.6502, century: "XIII", style: "Medieval" },
+  { name: "Castelo de Aljezur", location: "Aljezur", country: "Portugal", lat: 37.3182, lng: -8.8019, century: "X", style: "Mourisco" },
+  { name: "Ruínas Romanas de Milreu", location: "Estoi", country: "Portugal", lat: 37.0510, lng: -7.8970, century: "I", style: "Romano" },
+  // ========== AÇORES ==========
+  { name: "Forte de São Brás", location: "Ponta Delgada, São Miguel", country: "Portugal", lat: 37.7399, lng: -25.6687, century: "XVI", style: "Militar" },
+  { name: "Portas da Cidade", location: "Ponta Delgada, São Miguel", country: "Portugal", lat: 37.7393, lng: -25.6687, century: "XVIII", style: "Barroco" },
+  { name: "Igreja de São Sebastião", location: "Ponta Delgada, São Miguel", country: "Portugal", lat: 37.7397, lng: -25.6708, century: "XVI", style: "Manuelino/Barroco" },
+  { name: "Convento de Nossa Senhora da Esperança", location: "Ponta Delgada, São Miguel", country: "Portugal", lat: 37.7391, lng: -25.6694, century: "XVI", style: "Religioso" },
+  { name: "Igreja de São Pedro", location: "Ponta Delgada, São Miguel", country: "Portugal", lat: 37.7415, lng: -25.6720, century: "XVI", style: "Manuelino" },
+  { name: "Ermida de Nossa Senhora da Paz", location: "Vila Franca do Campo, São Miguel", country: "Portugal", lat: 37.7148, lng: -25.4330, century: "XVIII", style: "Barroco" },
+  { name: "Torre Sineira de Ribeira Grande", location: "Ribeira Grande, São Miguel", country: "Portugal", lat: 37.8170, lng: -25.5218, century: "XVIII", style: "Barroco" },
+  // Terceira — coordenadas exatas
+  { name: "Centro Histórico de Angra do Heroísmo", location: "Angra do Heroísmo, Terceira", country: "Portugal", lat: 38.6569, lng: -27.2237, century: "XVI", style: "Património UNESCO" },
+  { name: "Sé de Angra do Heroísmo", location: "Angra do Heroísmo, Terceira", country: "Portugal", lat: 38.6563, lng: -27.2219, century: "XVI", style: "Religioso" },
+  { name: "Monte Brasil", location: "Angra do Heroísmo, Terceira", country: "Portugal", lat: 38.6505, lng: -27.2367, century: "-", style: "Natureza/Vulcânico" },
+  { name: "Castelo de São João Baptista", location: "Angra do Heroísmo, Terceira", country: "Portugal", lat: 38.6528, lng: -27.2355, century: "XVI", style: "Militar" },
+  { name: "Castelo de São Sebastião", location: "Angra do Heroísmo, Terceira", country: "Portugal", lat: 38.6588, lng: -27.2135, century: "XVI", style: "Militar" },
+  { name: "Convento de São Francisco (Museu de Angra)", location: "Angra do Heroísmo, Terceira", country: "Portugal", lat: 38.6558, lng: -27.2231, century: "XVII", style: "Cultural" },
+  { name: "Palácio dos Capitães-Generais", location: "Angra do Heroísmo, Terceira", country: "Portugal", lat: 38.6566, lng: -27.2228, century: "XVII", style: "Histórico" },
+  { name: "Algar do Carvão", location: "Terceira", country: "Portugal", lat: 38.7336, lng: -27.2706, century: "-", style: "Geologia Vulcânica" },
+  { name: "Gruta do Natal", location: "Terceira", country: "Portugal", lat: 38.7393, lng: -27.2765, century: "-", style: "Geologia Vulcânica" },
+  { name: "Furnas do Enxofre", location: "Terceira", country: "Portugal", lat: 38.7245, lng: -27.2555, century: "-", style: "Geologia Vulcânica" },
+  { name: "Caldeira de Guilherme Moniz", location: "Terceira", country: "Portugal", lat: 38.7300, lng: -27.2500, century: "-", style: "Geologia Vulcânica" },
+  { name: "Serra de Santa Bárbara", location: "Terceira", country: "Portugal", lat: 38.7303, lng: -27.3215, century: "-", style: "Natureza/Montanha" },
+  { name: "Miradouro da Serra do Cume", location: "Terceira", country: "Portugal", lat: 38.7202, lng: -27.1655, century: "-", style: "Miradouro" },
+  { name: "Miradouro do Facho", location: "Praia da Vitória, Terceira", country: "Portugal", lat: 38.7335, lng: -27.0583, century: "-", style: "Miradouro" },
+  { name: "Miradouro da Ponta do Queimado", location: "Terceira", country: "Portugal", lat: 38.7830, lng: -27.3500, century: "-", style: "Miradouro" },
+  { name: "Miradouro da Alagoa", location: "Terceira", country: "Portugal", lat: 38.7160, lng: -27.1980, century: "-", style: "Miradouro" },
+  { name: "Piscinas Naturais dos Biscoitos", location: "Biscoitos, Terceira", country: "Portugal", lat: 38.7902, lng: -27.2525, century: "-", style: "Zona Balnear" },
+  { name: "Praia da Vitória", location: "Praia da Vitória, Terceira", country: "Portugal", lat: 38.7337, lng: -27.0667, century: "-", style: "Praia" },
+  { name: "Quatro Ribeiras", location: "Terceira", country: "Portugal", lat: 38.7930, lng: -27.1900, century: "-", style: "Zona Balnear" },
+  { name: "Calheta dos Lagadores", location: "Terceira", country: "Portugal", lat: 38.6760, lng: -27.3500, century: "-", style: "Costa Rochosa" },
+  { name: "Impérios do Divino Espírito Santo", location: "Terceira", country: "Portugal", lat: 38.6500, lng: -27.2200, century: "XVIII", style: "Cultural" },
+  { name: "Igreja da Conceição", location: "Angra do Heroísmo, Terceira", country: "Portugal", lat: 38.6600, lng: -27.2150, century: "XVII", style: "Religioso" },
+  { name: "Santuário de Nossa Sra. dos Milagres", location: "Serreta, Terceira", country: "Portugal", lat: 38.7650, lng: -27.3500, century: "XVIII", style: "Religioso" },
+  { name: "Lagoa das Patas", location: "Terceira", country: "Portugal", lat: 38.7520, lng: -27.2850, century: "-", style: "Natureza/Lagoa" },
+  { name: "Mata da Serreta", location: "Serreta, Terceira", country: "Portugal", lat: 38.7700, lng: -27.3500, century: "-", style: "Natureza/Floresta" },
+  { name: "Rocha do Chambre", location: "Terceira", country: "Portugal", lat: 38.7600, lng: -27.2600, century: "-", style: "Geologia Vulcânica" },
+  { name: "Ponta das Contendas", location: "Terceira", country: "Portugal", lat: 38.6410, lng: -27.0900, century: "-", style: "Reserva Natural" },
+  { name: "Igreja de São Salvador", location: "Santa Cruz da Graciosa, Graciosa", country: "Portugal", lat: 39.0848, lng: -28.0058, century: "XVI", style: "Manuelino" },
+  { name: "Ermida de Nossa Sra. da Ajuda", location: "Santa Cruz da Graciosa, Graciosa", country: "Portugal", lat: 39.0916, lng: -27.9841, century: "XVI", style: "Religioso" },
+  { name: "Igreja de Santa Bárbara", location: "Manadas, São Jorge", country: "Portugal", lat: 38.6748, lng: -28.1697, century: "XVIII", style: "Barroco" },
+  { name: "Forte de Santa Cruz", location: "Horta, Faial", country: "Portugal", lat: 38.5333, lng: -28.6250, century: "XVI", style: "Militar" },
+  { name: "Igreja Matriz do Santíssimo Salvador", location: "Horta, Faial", country: "Portugal", lat: 38.5350, lng: -28.6250, century: "XVII", style: "Barroco" },
+  { name: "Igreja de São Roque", location: "São Roque do Pico, Pico", country: "Portugal", lat: 38.5175, lng: -28.3197, century: "XVII", style: "Barroco" },
+  { name: "Paisagem da Vinha do Pico", location: "Criação Velha, Pico", country: "Portugal", lat: 38.5115, lng: -28.4290, century: "XV", style: "Paisagem Cultural UNESCO" },
+  { name: "Museu dos Baleeiros", location: "Lajes do Pico, Pico", country: "Portugal", lat: 38.3897, lng: -28.2595, century: "XIX", style: "Industrial/Cultural" },
+  { name: "Forte de São Brás (Flores)", location: "Santa Cruz das Flores, Flores", country: "Portugal", lat: 39.4533, lng: -31.1278, century: "XVI", style: "Militar" },
+  { name: "Igreja de Nossa Sra. da Conceição", location: "Vila do Corvo, Corvo", country: "Portugal", lat: 39.6745, lng: -31.1107, century: "XVII", style: "Religioso" },
+  // ========== MADEIRA ==========
+  { name: "Sé do Funchal", location: "Funchal, Madeira", country: "Portugal", lat: 32.6488, lng: -16.9080, century: "XV", style: "Manuelino/Gótico" },
+  { name: "Fortaleza de São Tiago", location: "Funchal, Madeira", country: "Portugal", lat: 32.6454, lng: -16.9027, century: "XVII", style: "Militar" },
+  { name: "Fortaleza do Pico", location: "Funchal, Madeira", country: "Portugal", lat: 32.6486, lng: -16.9042, century: "XVI", style: "Militar" },
+  { name: "Igreja do Colégio", location: "Funchal, Madeira", country: "Portugal", lat: 32.6498, lng: -16.9098, century: "XVII", style: "Jesuíta/Barroco" },
+  { name: "Convento de Santa Clara", location: "Funchal, Madeira", country: "Portugal", lat: 32.6503, lng: -16.9073, century: "XV", style: "Gótico/Manuelino" },
+  { name: "Palácio de São Lourenço", location: "Funchal, Madeira", country: "Portugal", lat: 32.6475, lng: -16.9065, century: "XVI", style: "Militar/Palaciano" },
+  { name: "Capela de Nossa Sra. da Penha de França", location: "Funchal, Madeira", country: "Portugal", lat: 32.6510, lng: -16.9095, century: "XVII", style: "Barroco" },
+  { name: "Torre do Capitão", location: "Funchal, Madeira", country: "Portugal", lat: 32.6530, lng: -16.9100, century: "XV", style: "Medieval" },
+  { name: "Igreja Matriz de Machico", location: "Machico, Madeira", country: "Portugal", lat: 32.7180, lng: -16.7660, century: "XV", style: "Manuelino" },
+  { name: "Forte de São João Baptista do Pico", location: "Machico, Madeira", country: "Portugal", lat: 32.7185, lng: -16.7615, century: "XVII", style: "Militar" },
+  { name: "Capela dos Milagres", location: "Machico, Madeira", country: "Portugal", lat: 32.7195, lng: -16.7630, century: "XV", style: "Gótico" },
+  { name: "Forte do Ilhéu", location: "Porto Moniz, Madeira", country: "Portugal", lat: 32.8290, lng: -17.1690, century: "XVII", style: "Militar" },
+  { name: "Igreja de Nossa Sra. da Luz", location: "Ponta do Sol, Madeira", country: "Portugal", lat: 32.6728, lng: -17.0998, century: "XV", style: "Manuelino" },
+  { name: "Forte de São José", location: "Vila Baleira, Porto Santo", country: "Portugal", lat: 33.0602, lng: -16.3357, century: "XVII", style: "Militar" },
+  { name: "Casa Museu Cristóvão Colombo", location: "Vila Baleira, Porto Santo", country: "Portugal", lat: 33.0611, lng: -16.3348, century: "XV", style: "Colonial" },
+  // Espanha
+  { name: "Alhambra", location: "Granada", country: "Espanha", lat: 37.1760, lng: -3.5881, century: "XIII", style: "Nasrida" },
+  { name: "Sagrada Família", location: "Barcelona", country: "Espanha", lat: 41.4036, lng: 2.1744, century: "XIX", style: "Modernismo" },
+  { name: "Palácio Real de Madrid", location: "Madrid", country: "Espanha", lat: 40.4180, lng: -3.7143, century: "XVIII", style: "Barroco" },
+  { name: "Catedral de Sevilha", location: "Sevilha", country: "Espanha", lat: 37.3861, lng: -5.9926, century: "XV", style: "Gótico" },
+  // França
+  { name: "Torre Eiffel", location: "Paris", country: "França", lat: 48.8584, lng: 2.2945, century: "XIX", style: "Ferro" },
+  { name: "Catedral de Notre-Dame", location: "Paris", country: "França", lat: 48.8530, lng: 2.3499, century: "XII", style: "Gótico" },
+  { name: "Mont Saint-Michel", location: "Normandia", country: "França", lat: 48.6361, lng: -1.5115, century: "X", style: "Medieval" },
+  // Itália
+  { name: "Coliseu", location: "Roma", country: "Itália", lat: 41.8902, lng: 12.4922, century: "I", style: "Romano" },
+  { name: "Torre de Pisa", location: "Pisa", country: "Itália", lat: 43.7230, lng: 10.3966, century: "XII", style: "Românico" },
+  { name: "Basílica de São Marcos", location: "Veneza", country: "Itália", lat: 45.4345, lng: 12.3391, century: "XI", style: "Bizantino" },
+  // Grécia
+  { name: "Parthenon", location: "Atenas", country: "Grécia", lat: 37.9715, lng: 23.7267, century: "V a.C.", style: "Grego Clássico" },
+  // Alemanha
+  { name: "Porta de Brandemburgo", location: "Berlim", country: "Alemanha", lat: 52.5163, lng: 13.3777, century: "XVIII", style: "Neoclássico" },
+  { name: "Castelo de Neuschwanstein", location: "Baviera", country: "Alemanha", lat: 47.5576, lng: 10.7498, century: "XIX", style: "Romântico" },
+  // Reino Unido
+  { name: "Tower of London", location: "Londres", country: "Reino Unido", lat: 51.5081, lng: -0.0759, century: "XI", style: "Medieval" },
+  { name: "Stonehenge", location: "Wiltshire", country: "Reino Unido", lat: 51.1789, lng: -1.8262, century: "III milénio a.C.", style: "Megalítico" },
+  // Outros
+  { name: "Atomium", location: "Bruxelas", country: "Bélgica", lat: 50.8950, lng: 4.3416, century: "XX", style: "Moderno" },
+  { name: "Castelo de Wawel", location: "Cracóvia", country: "Polónia", lat: 50.0540, lng: 19.9354, century: "XIV", style: "Gótico/Renascença" },
+];
 
 interface UserStats {
   level: number;
@@ -70,56 +227,16 @@ interface Challenge {
 
 const Home = () => {
   const [user, setUser] = useState<any>(null);
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [filterType, setFilterType] = useState<"all" | "country">("all");
-  const [selectedCountry, setSelectedCountry] = useState("");
-  const [likedPosts, setLikedPosts] = useState<string[]>([]);
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
-  const [commentText, setCommentText] = useState<{ [postId: string]: string }>({});
-  const [expandedComments, setExpandedComments] = useState<string[]>([]);
+  const [selectedMonument, setSelectedMonument] = useState<MapMonument | null>(null);
 
   useEffect(() => {
     const userData = authService.getUser();
     setUser(userData);
-    loadPosts();
     loadUserStats();
     loadChallenges();
   }, []);
-
-  useEffect(() => {
-    loadPosts();
-  }, [filterType, selectedCountry]);
-
-  const loadPosts = async () => {
-    try {
-      setLoading(true);
-      let url = `${API_URL}/api/posts`;
-
-      if (filterType === "country" && selectedCountry) {
-        url = `${API_URL}/api/posts/country/${selectedCountry}`;
-      }
-
-      const response = await axios.get(url, { params: { limit: 20 } });
-
-      if (response.data.success) {
-        setPosts(response.data.data);
-        // Set liked posts based on current user
-        const userData = authService.getUser();
-        if (userData) {
-          const liked = response.data.data
-            .filter((p: Post) => p.likes.some((l: any) => l.userId === userData.id))
-            .map((p: Post) => p._id);
-          setLikedPosts(liked);
-        }
-      }
-    } catch (error) {
-      console.error("Erro ao carregar posts:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const loadUserStats = async () => {
     try {
@@ -140,16 +257,11 @@ const Home = () => {
     try {
       const token = authService.getToken();
       if (!token) return;
-      // Seed challenges if none exist
-      await axios.post(`${API_URL}/api/challenges/seed`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      }).catch(() => {});
-      const response = await axios.get(`${API_URL}/api/challenges`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (response.data.success) {
-        setChallenges(response.data.data);
-      }
+      // Sync progress based on actual activity
+      await challengeService.syncProgress().catch(() => {});
+      // Load challenges with updated progress
+      const data = await challengeService.getChallenges();
+      setChallenges(data);
     } catch (error) {
       console.error("Erro ao carregar desafios:", error);
     }
@@ -157,78 +269,14 @@ const Home = () => {
 
   const handleJoinChallenge = async (challengeId: string) => {
     try {
-      const token = authService.getToken();
-      await axios.post(`${API_URL}/api/challenges/${challengeId}/join`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await challengeService.joinChallenge(challengeId);
+      // Sync progress immediately after joining
+      await challengeService.syncProgress().catch(() => {});
       loadChallenges();
+      loadUserStats();
     } catch (error: any) {
       alert(error.response?.data?.message || "Erro ao participar");
     }
-  };
-
-  const handleLikePost = async (postId: string) => {
-    try {
-      const token = authService.getToken();
-      const response = await axios.put(
-        `${API_URL}/api/posts/${postId}/like`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      if (response.data.success) {
-        // Toggle like in UI
-        if (likedPosts.includes(postId)) {
-          setLikedPosts(likedPosts.filter((id) => id !== postId));
-        } else {
-          setLikedPosts([...likedPosts, postId]);
-        }
-
-        // Reload posts
-        loadPosts();
-      }
-    } catch (error) {
-      console.error("Erro ao dar like:", error);
-    }
-  };
-
-  const handleAddComment = async (postId: string) => {
-    const text = commentText[postId]?.trim();
-    if (!text) return;
-    try {
-      const token = authService.getToken();
-      await axios.put(
-        `${API_URL}/api/posts/${postId}/comment`,
-        { text },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setCommentText({ ...commentText, [postId]: "" });
-      loadPosts();
-    } catch (error) {
-      console.error("Erro ao comentar:", error);
-    }
-  };
-
-  const toggleComments = (postId: string) => {
-    if (expandedComments.includes(postId)) {
-      setExpandedComments(expandedComments.filter((id) => id !== postId));
-    } else {
-      setExpandedComments([...expandedComments, postId]);
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInMinutes = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60)
-    );
-
-    if (diffInMinutes < 60) return `há ${diffInMinutes} minutos`;
-    if (diffInMinutes < 1440) return `há ${Math.floor(diffInMinutes / 60)} horas`;
-    if (diffInMinutes < 10080) return `há ${Math.floor(diffInMinutes / 1440)} dias`;
-
-    return date.toLocaleDateString("pt-PT");
   };
 
   return (
@@ -267,6 +315,36 @@ const Home = () => {
               <span className="stat-label">Grupos</span>
             </div>
           </div>
+        </div>
+
+        {/* 2. MONUMENTS MAP */}
+        <div className="section">
+          <h3 className="section-title">
+            <IonIcon icon={locationOutline} style={{ marginRight: 6, verticalAlign: "middle" }} />
+            Monumentos no Mundo
+          </h3>
+          <div className="map-container">
+            <Suspense fallback={<div className="map-loading">A carregar mapa...</div>}>
+              <MonumentMap
+                monuments={MAP_MONUMENTS}
+                onSelect={setSelectedMonument}
+              />
+            </Suspense>
+          </div>
+          {selectedMonument && (
+            <div className="monument-detail-card">
+              <div className="monument-detail-header">
+                <h4>{selectedMonument.name}</h4>
+                <button className="close-detail" onClick={() => setSelectedMonument(null)}>✕</button>
+              </div>
+              <div className="monument-detail-tags">
+                <span className="monument-tag">{selectedMonument.location}</span>
+                <span className="monument-tag">{selectedMonument.country}</span>
+                <span className="monument-tag">Séc. {selectedMonument.century}</span>
+                <span className="monument-tag">{selectedMonument.style}</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 3. ACTIVE CHALLENGES — real data */}
@@ -319,135 +397,6 @@ const Home = () => {
               </div>
             ))
           )}
-        </div>
-
-        {/* 4. COMMUNITY FEED */}
-        <div className="section">
-          <h3 className="section-title">Feed da Comunidade</h3>
-
-          {/* FILTERS */}
-          <div className="filters-section">
-            <IonSegment
-              value={filterType}
-              onIonChange={(e) => setFilterType(e.detail.value as any)}
-            >
-              <IonSegmentButton value="all">Todas</IonSegmentButton>
-              <IonSegmentButton value="country">Por País</IonSegmentButton>
-            </IonSegment>
-
-            {filterType === "country" && (
-              <select
-                value={selectedCountry}
-                onChange={(e) => setSelectedCountry(e.target.value)}
-                className="country-filter"
-              >
-                <option value="">Seleccione um país...</option>
-                {COUNTRIES.map((country) => (
-                  <option key={country} value={country}>
-                    {country}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
-
-          {/* POSTS */}
-          <IonLoading isOpen={loading} message="A carregar publicações..." />
-
-          {posts.length === 0 && !loading && (
-            <div className="no-posts">
-              <IonIcon icon={cameraOutline} />
-              <p>Nenhuma publicação encontrada</p>
-            </div>
-          )}
-
-          {posts.map((post) => (
-            <div key={post._id} className="community-post">
-              <div className="post-header">
-                <div className="post-avatar">
-                  {post.userName?.charAt(0)?.toUpperCase() || "U"}
-                </div>
-                <div className="post-info">
-                  <h4>{post.userName}</h4>
-                  <p className="post-time">{formatDate(post.createdAt)}</p>
-                  <p className="post-location">
-                    <IonIcon icon={locationOutline} style={{ marginRight: "4px" }} />
-                    {post.location}, {post.country}
-                  </p>
-                </div>
-              </div>
-              <p className="post-title">{post.title}</p>
-              <p className="post-description">{post.description}</p>
-
-              {post.image && (
-                <div className="post-image">
-                  <img src={post.image} alt={post.title} />
-                </div>
-              )}
-
-              <div className="post-actions">
-                <button
-                  onClick={() => handleLikePost(post._id)}
-                  className={`action-btn ${
-                    likedPosts.includes(post._id) ? "liked" : ""
-                  }`}
-                >
-                  <IonIcon
-                    icon={likedPosts.includes(post._id) ? heartSharp : heartOutline}
-                  />
-                  {post.likes.length}
-                </button>
-                <button
-                  className="action-btn"
-                  onClick={() => toggleComments(post._id)}
-                >
-                  <IonIcon icon={chatbubbleOutline} />
-                  {post.comments.length}
-                  <IonIcon
-                    icon={expandedComments.includes(post._id) ? chevronUpOutline : chevronDownOutline}
-                    style={{ fontSize: 12, marginLeft: 4 }}
-                  />
-                </button>
-              </div>
-
-              {/* Comments section */}
-              {expandedComments.includes(post._id) && (
-                <div className="comments-section">
-                  {post.comments.length > 0 && (
-                    <div className="comments-list">
-                      {post.comments.map((c: any, idx: number) => (
-                        <div key={idx} className="comment-item">
-                          <strong>{c.userName}</strong>
-                          <span>{c.text}</span>
-                          <small>{formatDate(c.createdAt)}</small>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  <div className="comment-input-row">
-                    <IonInput
-                      placeholder="Escrever comentário..."
-                      value={commentText[post._id] || ""}
-                      onIonChange={(e) =>
-                        setCommentText({ ...commentText, [post._id]: e.detail.value || "" })
-                      }
-                    />
-                    <IonButton
-                      fill="clear"
-                      onClick={() => handleAddComment(post._id)}
-                    >
-                      <IonIcon icon={sendOutline} />
-                    </IonButton>
-                  </div>
-                </div>
-              )}
-
-              <div className="post-metadata">
-                <span className="badge">{post.region}</span>
-                <span className="badge">{post.country}</span>
-              </div>
-            </div>
-          ))}
         </div>
 
         <div style={{ height: "80px" }}></div>

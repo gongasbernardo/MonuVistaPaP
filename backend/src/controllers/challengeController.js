@@ -1,5 +1,8 @@
 const Challenge = require('../models/Challenge');
 const User = require('../models/User');
+const Post = require('../models/Post');
+const Group = require('../models/Group');
+const AlbumMonument = require('../models/AlbumMonument');
 
 // @desc    Get all active challenges
 // @route   GET /api/challenges
@@ -116,11 +119,6 @@ exports.updateProgress = async (req, res) => {
 // @access  Private
 exports.seedChallenges = async (req, res) => {
   try {
-    const existing = await Challenge.countDocuments();
-    if (existing > 0) {
-      return res.status(200).json({ success: true, message: 'Challenges already exist', count: existing });
-    }
-
     const defaults = [
       {
         title: 'Explorador Medieval',
@@ -156,9 +154,125 @@ exports.seedChallenges = async (req, res) => {
       },
     ];
 
-    await Challenge.insertMany(defaults);
+    let created = 0;
+    for (const def of defaults) {
+      const exists = await Challenge.findOne({ title: def.title });
+      if (!exists) {
+        await Challenge.create(def);
+        created++;
+      }
+    }
 
-    res.status(201).json({ success: true, message: 'Default challenges seeded', count: defaults.length });
+    // Remove duplicates: keep only the oldest challenge per title
+    const allChallenges = await Challenge.find().sort({ createdAt: 1 });
+    const seen = new Set();
+    for (const ch of allChallenges) {
+      if (seen.has(ch.title)) {
+        await Challenge.findByIdAndDelete(ch._id);
+      } else {
+        seen.add(ch.title);
+      }
+    }
+
+    const count = await Challenge.countDocuments();
+    res.status(200).json({ success: true, message: created > 0 ? 'Challenges seeded' : 'Challenges already exist', count });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Sync challenge progress based on actual user activity
+// @route   POST /api/challenges/sync-progress
+// @access  Private
+exports.syncProgress = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Count actual user activity
+    const postsCount = await Post.countDocuments({ userId });
+    const discoveriesCount = await AlbumMonument.countDocuments({ userId, visited: true });
+    const groupsCount = await Group.countDocuments({ members: userId });
+
+    // Count comments made by this user across all posts
+    const postsWithUserComments = await Post.find({ 'comments.userId': userId });
+    let commentsCount = 0;
+    for (const post of postsWithUserComments) {
+      commentsCount += post.comments.filter(c => c.userId.toString() === userId).length;
+    }
+
+    // Map challenge types to actual counts
+    const activityCounts = {
+      discoveries: discoveriesCount,
+      posts: postsCount,
+      groups: groupsCount,
+      comments: commentsCount,
+      likes: 0, // not used in current challenges
+    };
+
+    // Find all active challenges the user has joined
+    const challenges = await Challenge.find({
+      active: true,
+      'participants.userId': userId
+    });
+
+    const user = await User.findById(userId);
+    const completedNow = [];
+
+    for (const challenge of challenges) {
+      const participant = challenge.participants.find(p => p.userId.toString() === userId);
+      if (!participant) continue;
+
+      const newProgress = Math.min(activityCounts[challenge.type] || 0, challenge.target);
+
+      // Only update if progress changed
+      if (newProgress !== participant.progress) {
+        participant.progress = newProgress;
+      }
+
+      // Check for completion
+      if (participant.progress >= challenge.target && !participant.completed) {
+        participant.completed = true;
+        participant.completedAt = new Date();
+
+        // Award XP
+        user.xp = (user.xp || 0) + (challenge.reward?.xp || 0);
+
+        // Award badge if not already earned
+        if (challenge.reward?.badge?.name) {
+          const alreadyHasBadge = (user.badges || []).some(
+            b => b.name === challenge.reward.badge.name
+          );
+          if (!alreadyHasBadge) {
+            user.badges.push({
+              name: challenge.reward.badge.name,
+              description: challenge.reward.badge.description || '',
+              icon: challenge.reward.badge.icon || 'trophy',
+              earnedAt: new Date()
+            });
+          }
+        }
+
+        completedNow.push({
+          title: challenge.title,
+          xp: challenge.reward?.xp || 0,
+          badge: challenge.reward?.badge?.name || null
+        });
+      }
+
+      await challenge.save();
+    }
+
+    if (completedNow.length > 0) {
+      await user.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        activityCounts,
+        completedNow,
+      }
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

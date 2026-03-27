@@ -24,6 +24,7 @@ import {
 } from "ionicons/icons";
 import BottomNav from "../components/BottomNav";
 import albumService, { Folder } from "../services/albumService";
+import challengeService from "../services/challengeService";
 import "./VisitPlace.css";
 
 interface Monument {
@@ -236,6 +237,11 @@ const VisitPlace = () => {
       },
       visited
     );
+
+    // Sync challenge progress (discoveries challenge)
+    if (visited) {
+      challengeService.syncProgress().catch(() => {});
+    }
 
     setAlreadyInAlbum(true);
     setShowAddAlert(false);

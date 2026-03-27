@@ -39,12 +39,20 @@ import { API_URL } from "../config";
 import BottomNav from "../components/BottomNav";
 import "./Profile.css";
 
+interface Badge {
+  name: string;
+  description: string;
+  icon: string;
+  earnedAt: string;
+}
+
 interface UserStats {
   level: number;
   levelTitle: string;
   xp: number;
   nextLevelXp: number | null;
   discoveries: number;
+  badges: Badge[];
   badgesCount: number;
   postsCount: number;
   groupsCount: number;
@@ -358,6 +366,36 @@ const Profile = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Badges Section */}
+              {(userStats?.badges?.length ?? 0) > 0 && (
+                <div className="profile-section">
+                  <div className="section-header">
+                    <IonIcon icon={ribbonOutline} />
+                    <h3>Badges Conquistados</h3>
+                  </div>
+                  <div className="badges-grid">
+                    {userStats!.badges.map((badge, idx) => {
+                      const badgeIcons: Record<string, string> = {
+                        shield: "🛡️",
+                        camera: "📸",
+                        people: "👥",
+                        chatbubble: "💬",
+                        trophy: "🏆",
+                      };
+                      return (
+                        <div key={idx} className="badge-card">
+                          <span className="badge-icon-large">
+                            {badgeIcons[badge.icon] || "🏆"}
+                          </span>
+                          <span className="badge-name">{badge.name}</span>
+                          <span className="badge-desc">{badge.description}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </>
           )}
 
