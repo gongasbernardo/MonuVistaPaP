@@ -129,7 +129,7 @@
 .stat-value {
   font-size: 1.5rem;
   font-weight: bold;
-  color: var(--ion-color-primary);
+  color: #E8805F;
 }
 
 .stat-label {
@@ -172,7 +172,7 @@
 }
 
 .message-header strong {
-  color: var(--ion-color-primary);
+  color: #E8805F;
 }
 
 .message-header small {
@@ -190,7 +190,7 @@
   bottom: 70px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--ion-color-primary, #3880ff);
+  background: #E8805F;
   color: #fff;
   padding: 6px 16px;
   border-radius: 20px;
@@ -297,7 +297,7 @@
 
 .tag {
   display: inline-block;
-  background-color: var(--ion-color-primary);
+  background-color: #E8805F;
   color: white;
   padding: 0.25rem 0.75rem;
   border-radius: 20px;

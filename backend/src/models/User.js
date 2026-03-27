@@ -20,6 +20,10 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Name is required'],
     trim: true
   },
+  avatar: {
+    type: String,
+    default: ''
+  },
   // User stats / gamification
   level: {
     type: Number,
