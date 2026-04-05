@@ -1,0 +1,51 @@
+/* Mapbox specific styles to prevent conflicts with Ionic */
+.mapboxgl-map {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+}
+
+.mapboxgl-ctrl-attrib {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 10px !important;
+}
+
+.mapboxgl-popup-content {
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  padding: 12px !important;
+}
+
+.mapboxgl-popup-tip {
+  border-width: 8px !important;
+}
+
+/* Prevent map from interfering with Ionic touch events */
+.mapboxgl-canvas {
+  touch-action: none !important;
+}
+
+/* Monument markers */
+.monument-marker {
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.portugal-marker {
+  width: 14px;
+  height: 14px;
+  background-color: #E8805F;
+  border: 2px solid #D95F3D;
+}
+
+.other-marker {
+  width: 12px;
+  height: 12px;
+  background-color: #9CA3AF;
+  border: 2px solid #6B7280;
+}
+
+.monument-marker:hover {
+  transform: scale(1.2);
+}

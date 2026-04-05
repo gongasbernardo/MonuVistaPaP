@@ -1,0 +1,84 @@
+/* ========================================
+   NOTIFICATION BELL
+   ======================================== */
+
+.notification-button {
+  position: relative;
+}
+
+.notification-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 10px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+}
+
+.notification-popover {
+  --width: 320px;
+  --max-height: 400px;
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--ion-color-light-shade);
+}
+
+.notification-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+}
+
+.notification-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.notification-list ion-item {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+}
+
+.notification-list ion-item.unread {
+  --background: rgba(232, 128, 95, 0.05);
+  border-left: 3px solid #e8805f;
+}
+
+.notification-message {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.notification-date {
+  font-size: 0.75rem;
+  color: var(--ion-color-medium);
+  margin: 0;
+}
+
+.notification-group {
+  font-size: 0.8rem;
+  color: var(--ion-color-primary);
+  font-weight: 500;
+  margin: 0;
+}
+
+.no-notifications {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--ion-color-medium);
+}
+
+.no-notifications p {
+  margin: 0;
+  font-size: 0.9rem;
+}

@@ -81,6 +81,14 @@ body {
   color: var(--neutral-700);
 }
 
+html,
+body,
+#root,
+ion-app,
+ion-page {
+  min-height: 100%;
+}
+
 /* ========================================
    HEADER & NAVIGATION
    ======================================== */
@@ -88,7 +96,9 @@ body {
 .home-header {
   --background: linear-gradient(135deg, #E8805F 0%, #D95F3D 100%);
   box-shadow: var(--shadow-lg);
-  padding-top: 8px;
+  padding-top: 22px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.24);
 }
 
 .header-content {
@@ -103,8 +113,8 @@ body {
 
 .home-header ion-title {
   color: white;
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
+  font-size: 2.4rem;
+  font-weight: var(--font-weight-black);
   margin: 0;
   letter-spacing: -0.5px;
 }
@@ -112,15 +122,32 @@ body {
 .search-bar {
   width: 100%;
   padding: var(--spacing-md) var(--spacing-lg);
-  border-radius: var(--radius-full);
+  border-radius: 999px;
   border: none;
   background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
   color: white;
   font-size: var(--font-size-base);
   margin-bottom: var(--spacing-md);
   transition: var(--transition-base);
   font-weight: var(--font-weight-medium);
+}
+
+.search-bar::placeholder {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.search-bar:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.16);
+}
+
+.home-content {
+  --background: transparent;
+  padding: 24px 20px 140px;
+  max-width: 960px;
+  margin: 0 auto;
 }
 
 .search-bar::placeholder {
@@ -139,11 +166,80 @@ body {
    ======================================== */
 
 .home-content {
-  --background: var(--neutral-50);
+  --background: transparent;
   padding: var(--spacing-2xl);
   padding-bottom: 120px;
   max-width: 800px;
   margin: 0 auto;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .home-content {
+    padding: var(--spacing-lg);
+    padding-bottom: 100px;
+  }
+
+  .user-summary-card {
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-2xl);
+  }
+
+  .user-info {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--spacing-lg);
+  }
+
+  .user-stats {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-md);
+  }
+
+  .action-section {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .map-container {
+    height: 300px;
+  }
+
+  .section-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .challenge-card {
+    padding: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 480px) {
+  .home-content {
+    padding: var(--spacing-md);
+  }
+
+  .user-summary-card {
+    padding: var(--spacing-lg);
+  }
+
+  .avatar {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+  }
+
+  .user-details h2 {
+    font-size: var(--font-size-xl);
+  }
+
+  .stat-number {
+    font-size: 20px;
+  }
+
+  .map-container {
+    height: 250px;
+  }
 }
 
 /* ========================================
@@ -276,13 +372,13 @@ body {
    ======================================== */
 
 .user-summary-card {
-  background: var(--neutral-0);
+  background: linear-gradient(180deg, #ffffff 0%, #fff7ef 100%);
   border-radius: var(--radius-lg);
   padding: var(--spacing-2xl);
   margin-bottom: var(--spacing-3xl);
   box-shadow: var(--shadow-md);
   animation: slideInDown 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid var(--neutral-100);
+  border: 1px solid rgba(232, 128, 95, 0.16);
 }
 
 .user-info {
@@ -374,6 +470,9 @@ body {
 }
 
 .section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
   color: var(--neutral-900);
@@ -381,6 +480,11 @@ body {
   letter-spacing: -0.3px;
   padding-bottom: var(--spacing-md);
   border-bottom: 2px solid var(--neutral-100);
+}
+
+.section-title ion-icon {
+  color: var(--primary);
+  font-size: 24px;
 }
 
 /* ========================================
@@ -496,14 +600,13 @@ body {
    ======================================== */
 
 .challenge-card {
-  background: var(--neutral-0);
+  background: rgba(255, 255, 255, 0.98);
   border-radius: var(--radius-lg);
   padding: var(--spacing-2xl);
   box-shadow: var(--shadow-md);
-  border-left: 4px solid var(--primary);
+  border-left: 4px solid rgba(232, 128, 95, 0.75);
   animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid var(--neutral-100);
-  border-left: 4px solid var(--primary);
+  border: 1px solid rgba(226, 232, 240, 0.9);
   transition: var(--transition-base);
 }
 

@@ -1,0 +1,371 @@
+/* ========================================
+   MODERN APP NAVBAR - Enhanced Design
+   ======================================== */
+
+.app-navbar-header {
+  --background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.95) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 1px solid rgba(232, 128, 95, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.app-navbar-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(232, 128, 95, 0.02) 0%, rgba(217, 95, 61, 0.02) 100%);
+  pointer-events: none;
+}
+
+.app-navbar-header ion-toolbar {
+  --background: transparent;
+  --border-color: transparent;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --min-height: 64px;
+  position: relative;
+  z-index: 1;
+}
+
+.navbar-title {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.title-main {
+  font-weight: 800;
+  background: linear-gradient(135deg, #e8805f 0%, #d95f3d 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.title-accent {
+  font-weight: 600;
+  font-size: 0.85em;
+  color: #6b7280;
+  opacity: 0.8;
+}
+
+.app-navbar-header ion-button {
+  --color: #6b7280;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.app-navbar-header ion-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(232, 128, 95, 0.1);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease;
+}
+
+.app-navbar-header ion-button:hover::before {
+  width: 40px;
+  height: 40px;
+}
+
+.app-navbar-header ion-button:hover {
+  --color: #e8805f;
+  transform: scale(1.05);
+}
+
+.app-navbar-header ion-button ion-icon {
+  font-size: 1.25rem;
+  transition: transform 0.2s ease;
+}
+
+.app-navbar-header ion-button:hover ion-icon {
+  transform: scale(1.1);
+}
+
+/* ========================================
+   NAVIGATION OVERLAY & MENU
+   ======================================== */
+
+.app-navbar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 40;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 80px 16px 16px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.app-navbar-menu {
+  width: min(320px, 90vw);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(249, 250, 251, 0.95) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px;
+  box-shadow: 0 32px 64px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.2);
+  padding: 24px;
+  border: 1px solid rgba(232, 128, 95, 0.1);
+  animation: slideInRight 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.app-navbar-menu::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #e8805f 0%, #d95f3d 50%, #ff6b4a 100%);
+  border-radius: 24px 24px 0 0;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.app-navbar-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid rgba(232, 128, 95, 0.1);
+}
+
+.app-navbar-menu-header h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1f2937;
+  background: linear-gradient(135deg, #e8805f 0%, #d95f3d 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.app-navbar-menu-header ion-button {
+  --color: #6b7280;
+  --padding-start: 8px;
+  --padding-end: 8px;
+  --border-radius: 8px;
+  margin: 0;
+}
+
+.app-navbar-menu-header ion-button:hover {
+  --color: #e8805f;
+  --background: rgba(232, 128, 95, 0.1);
+}
+
+.app-navbar-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.app-navbar-link {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: 16px;
+  color: #374151;
+  background: rgba(248, 250, 252, 0.8);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(226, 232, 240, 0.5);
+  position: relative;
+  overflow: hidden;
+  animation: fadeInUp 0.4s ease-out both;
+}
+
+.app-navbar-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(232, 128, 95, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.app-navbar-link:hover::before {
+  left: 100%;
+}
+
+.app-navbar-link:hover {
+  background: rgba(232, 128, 95, 0.08);
+  transform: translateX(4px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(232, 128, 95, 0.15);
+  border-color: rgba(232, 128, 95, 0.3);
+}
+
+.app-navbar-link.active {
+  background: linear-gradient(135deg, #e8805f 0%, #d95f3d 100%);
+  color: #ffffff;
+  box-shadow: 0 8px 25px rgba(232, 128, 95, 0.3);
+  border-color: rgba(217, 95, 61, 0.5);
+  transform: translateX(4px);
+}
+
+.app-navbar-link.active:hover {
+  transform: translateX(4px) scale(1.02);
+}
+
+.app-navbar-link.active ion-icon {
+  color: #ffffff;
+}
+
+.app-navbar-link ion-icon {
+  font-size: 1.25rem;
+  color: #d95f3d;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.app-navbar-link:hover ion-icon {
+  transform: scale(1.1);
+}
+
+.app-navbar-link span {
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+.active-indicator {
+  margin-left: auto;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.menu-footer {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(232, 128, 95, 0.1);
+  text-align: center;
+}
+
+.menu-footer-text {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 768px) {
+  .app-navbar-header ion-title {
+    font-size: 1.25rem;
+  }
+
+  .app-navbar-menu {
+    width: min(300px, 85vw);
+    padding: 20px;
+  }
+
+  .app-navbar-overlay {
+    padding: 70px 12px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-navbar-header ion-toolbar {
+    --padding-start: 12px;
+    --padding-end: 12px;
+    --min-height: 56px;
+  }
+
+  .app-navbar-header ion-title {
+    font-size: 1.125rem;
+  }
+
+  .app-navbar-menu {
+    width: min(280px, 90vw);
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .app-navbar-menu-header h3 {
+    font-size: 1rem;
+  }
+
+  .app-navbar-link {
+    padding: 14px 16px;
+    font-size: 0.9rem;
+  }
+}
+
+/* ========================================
+   UTILITIES
+   ======================================== */
+
+.app-router-outlet {
+  margin-top: 64px;
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Enhanced focus states for accessibility */
+.app-navbar-header ion-button:focus,
+.app-navbar-menu-header ion-button:focus {
+  outline: 2px solid #e8805f;
+  outline-offset: 2px;
+}
+
+/* Smooth transitions for theme changes */
+@media (prefers-reduced-motion: reduce) {
+  .app-navbar-link,
+  .app-navbar-header ion-button,
+  .app-navbar-menu {
+    transition: none;
+    animation: none;
+  }
+}

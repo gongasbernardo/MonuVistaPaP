@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const fileStorage = require('../utils/fileStorage');
+const emailService = require('../utils/emailService');
 const mongoose = require('mongoose');
 
 // Generate JWT Token
@@ -46,6 +47,14 @@ exports.register = async (req, res) => {
 
       const token = generateToken(user._id);
 
+      // Send welcome email (don't block registration if email fails)
+      try {
+        await emailService.sendWelcomeEmail(email, name);
+      } catch (emailError) {
+        console.error('Welcome email failed:', emailError);
+        // Continue with registration even if email fails
+      }
+
       res.status(201).json({
         success: true,
         message: 'User registered successfully',
@@ -68,6 +77,14 @@ exports.register = async (req, res) => {
 
       const user = await fileStorage.createUser({ email, password, name });
       const token = generateToken(user._id);
+
+      // Send welcome email (don't block registration if email fails)
+      try {
+        await emailService.sendWelcomeEmail(email, name);
+      } catch (emailError) {
+        console.error('Welcome email failed:', emailError);
+        // Continue with registration even if email fails
+      }
 
       res.status(201).json({
         success: true,
@@ -339,6 +356,396 @@ exports.markNotificationsRead = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error updating notifications',
+      error: error.message
+    });
+  }
+};
+// Request password reset
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide an email address'
+      });
+    }
+
+    if (isMongoConnected()) {
+      // Use MongoDB
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found with this email'
+        });
+      }
+
+      const resetToken = user.generateResetToken();
+      await user.save();
+
+      // Send password reset email
+      try {
+        await emailService.sendPasswordResetEmail(email, resetToken);
+        res.status(200).json({
+          success: true,
+          message: 'Password reset email sent successfully'
+        });
+      } catch (emailError) {
+        // If email fails, still save the token but inform the user
+        console.error('Email sending failed:', emailError);
+        res.status(200).json({
+          success: true,
+          message: 'Password reset token generated (email sending failed)'
+        });
+      }
+    } else {
+      // Use file storage
+      const user = fileStorage.findUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found with this email'
+        });
+      }
+
+      const crypto = require('crypto');
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+      fileStorage.updateResetToken(email, hashedToken, Date.now() + (30 * 60 * 1000));
+
+      // Send password reset email
+      try {
+        await emailService.sendPasswordResetEmail(email, resetToken);
+        res.status(200).json({
+          success: true,
+          message: 'Password reset email sent successfully'
+        });
+      } catch (emailError) {
+        // If email fails, still save the token but inform the user
+        console.error('Email sending failed:', emailError);
+        res.status(200).json({
+          success: true,
+          message: 'Password reset token generated (email sending failed)'
+        });
+      }
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error processing password reset request',
+      error: error.message
+    });
+  }
+};
+
+// Reset password
+exports.resetPassword = async (req, res) => {
+  try {
+    const { resetToken, newPassword } = req.body;
+
+    if (!resetToken || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide reset token and new password'
+      });
+    }
+
+    const crypto = require('crypto');
+    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+    if (isMongoConnected()) {
+      // Use MongoDB
+      const user = await User.findOne({
+        resetToken: hashedToken,
+        resetTokenExpire: { $gt: Date.now() }
+      });
+
+      if (!user) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid or expired reset token'
+        });
+      }
+
+      user.password = newPassword;
+      user.resetToken = null;
+      user.resetTokenExpire = null;
+      await user.save();
+
+      res.status(200).json({
+        success: true,
+        message: 'Password reset successfully'
+      });
+    } else {
+      // Use file storage
+      const user = fileStorage.findUserByResetToken(hashedToken);
+      if (!user) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid or expired reset token'
+        });
+      }
+
+      await fileStorage.updatePassword(user.email, newPassword);
+      fileStorage.clearResetToken(user.email);
+
+      res.status(200).json({
+        success: true,
+        message: 'Password reset successfully'
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error resetting password',
+      error: error.message
+    });
+  }
+};
+
+// Add monument to favorites
+exports.addFavorite = async (req, res) => {
+  try {
+    const { name, location } = req.body;
+
+    if (!name || !location) {
+      return res.status(400).json({
+        success: false,
+        message: 'Monument name and location are required'
+      });
+    }
+
+    if (isMongoConnected()) {
+      const user = await User.findById(req.user.id);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      // Check if already in favorites
+      const exists = user.favoriteMonuments.some(fav => fav.name === name);
+      if (exists) {
+        return res.status(400).json({
+          success: false,
+          message: 'Monument already in favorites'
+        });
+      }
+
+      user.favoriteMonuments.push({ name, location });
+      await user.save();
+
+      res.status(200).json({
+        success: true,
+        message: 'Monument added to favorites',
+        favorites: user.favoriteMonuments
+      });
+    } else {
+      // File storage implementation
+      const user = fileStorage.findUserById(req.user.id);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      if (!user.favoriteMonuments) user.favoriteMonuments = [];
+      
+      const exists = user.favoriteMonuments.some(fav => fav.name === name);
+      if (exists) {
+        return res.status(400).json({
+          success: false,
+          message: 'Monument already in favorites'
+        });
+      }
+
+      user.favoriteMonuments.push({ name, location, addedAt: new Date() });
+      fileStorage.updateUser(user);
+
+      res.status(200).json({
+        success: true,
+        message: 'Monument added to favorites',
+        favorites: user.favoriteMonuments
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error adding favorite',
+      error: error.message
+    });
+  }
+};
+
+// Remove monument from favorites
+exports.removeFavorite = async (req, res) => {
+  try {
+    const { name } = req.params;
+
+    if (isMongoConnected()) {
+      const user = await User.findById(req.user.id);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      user.favoriteMonuments = user.favoriteMonuments.filter(fav => fav.name !== name);
+      await user.save();
+
+      res.status(200).json({
+        success: true,
+        message: 'Monument removed from favorites',
+        favorites: user.favoriteMonuments
+      });
+    } else {
+      const user = fileStorage.findUserById(req.user.id);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      user.favoriteMonuments = user.favoriteMonuments.filter(fav => fav.name !== name);
+      fileStorage.updateUser(user);
+
+      res.status(200).json({
+        success: true,
+        message: 'Monument removed from favorites',
+        favorites: user.favoriteMonuments
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error removing favorite',
+      error: error.message
+    });
+  }
+};
+
+// Mark monument as visited
+exports.markVisited = async (req, res) => {
+  try {
+    const { name, location } = req.body;
+
+    if (!name || !location) {
+      return res.status(400).json({
+        success: false,
+        message: 'Monument name and location are required'
+      });
+    }
+
+    if (isMongoConnected()) {
+      const user = await User.findById(req.user.id);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      // Check if already visited
+      const exists = user.visitedMonuments.some(vis => vis.name === name);
+      if (exists) {
+        return res.status(400).json({
+          success: false,
+          message: 'Monument already marked as visited'
+        });
+      }
+
+      user.visitedMonuments.push({ name, location });
+      await user.save();
+
+      res.status(200).json({
+        success: true,
+        message: 'Monument marked as visited',
+        visited: user.visitedMonuments
+      });
+    } else {
+      const user = fileStorage.findUserById(req.user.id);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      if (!user.visitedMonuments) user.visitedMonuments = [];
+      
+      const exists = user.visitedMonuments.some(vis => vis.name === name);
+      if (exists) {
+        return res.status(400).json({
+          success: false,
+          message: 'Monument already marked as visited'
+        });
+      }
+
+      user.visitedMonuments.push({ name, location, visitedAt: new Date() });
+      fileStorage.updateUser(user);
+
+      res.status(200).json({
+        success: true,
+        message: 'Monument marked as visited',
+        visited: user.visitedMonuments
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error marking as visited',
+      error: error.message
+    });
+  }
+};
+
+// Get user's favorites and visited monuments
+exports.getUserMonuments = async (req, res) => {
+  try {
+    if (isMongoConnected()) {
+      const user = await User.findById(req.user.id);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        data: {
+          favorites: user.favoriteMonuments,
+          visited: user.visitedMonuments
+        }
+      });
+    } else {
+      const user = fileStorage.findUserById(req.user.id);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        data: {
+          favorites: user.favoriteMonuments || [],
+          visited: user.visitedMonuments || []
+        }
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error getting monuments',
       error: error.message
     });
   }

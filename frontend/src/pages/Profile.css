@@ -1,4 +1,15 @@
 /* ===== BASE ===== */
+.profile-header {
+  --background: linear-gradient(135deg, #E8805F 0%, #D95F3D 100%);
+  color: white;
+  box-shadow: var(--shadow-lg);
+}
+
+.profile-header ion-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
 .profile-content {
   --background: #f0f2f5;
 }

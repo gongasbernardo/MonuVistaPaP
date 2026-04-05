@@ -20,9 +20,7 @@ import {
   closeCircleOutline,
   addCircleOutline,
   checkmarkCircleOutline,
-  folderOutline,
 } from "ionicons/icons";
-import BottomNav from "../components/BottomNav";
 import albumService, { Folder } from "../services/albumService";
 import challengeService from "../services/challengeService";
 import "./VisitPlace.css";
@@ -484,7 +482,6 @@ const VisitPlace = () => {
         )}
       </IonContent>
 
-      <BottomNav />
     </IonPage>
   );
 };

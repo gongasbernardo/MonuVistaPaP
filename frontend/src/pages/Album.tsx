@@ -26,7 +26,6 @@ import {
   closeCircleOutline,
 } from "ionicons/icons";
 import albumService, { AlbumMonument, Folder } from "../services/albumService";
-import BottomNav from "../components/BottomNav";
 import "./Album.css";
 
 const Album = () => {
@@ -411,7 +410,6 @@ const Album = () => {
         />
       </IonContent>
 
-      <BottomNav />
     </IonPage>
   );
 };

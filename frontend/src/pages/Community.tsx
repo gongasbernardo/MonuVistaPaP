@@ -38,7 +38,6 @@ import axios from "axios";
 import { API_URL } from "../config";
 import { COUNTRIES, REGIONS_BY_COUNTRY } from "../constants/locations";
 import authService from "../services/authService";
-import BottomNav from "../components/BottomNav";
 import "./Community.css";
 
 interface Post {
@@ -524,7 +523,6 @@ const Community = () => {
           </IonContent>
         </IonModal>
       </IonContent>
-      <BottomNav />
     </IonPage>
   );
 };

@@ -39,7 +39,6 @@ import axios from "axios";
 import { io, Socket } from "socket.io-client";
 import { API_URL } from "../config";
 import challengeService from "../services/challengeService";
-import BottomNav from "../components/BottomNav";
 import "./Groups.css";
 
 interface Group {
@@ -86,7 +85,6 @@ const Groups: React.FC = () => {
   const [memberToKick, setMemberToKick] = useState<any | null>(null);
   const [notificationMessage, setNotificationMessage] = useState("");
   const [showNotification, setShowNotification] = useState(false);
-  const [showMembersModal, setShowMembersModal] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
   const messagesListRef = useRef<HTMLDivElement>(null);
@@ -192,12 +190,10 @@ const Groups: React.FC = () => {
   };
 
   const openMembersModal = () => {
-    setShowMembersModal(true);
     membersModalRef.current?.present();
   };
 
   const closeMembersModal = () => {
-    setShowMembersModal(false);
     membersModalRef.current?.dismiss();
   };
 
@@ -1344,7 +1340,6 @@ const Groups: React.FC = () => {
         {/* Manage Members Modal */}
         <IonModal
           ref={membersModalRef}
-          onDidDismiss={() => setShowMembersModal(false)}
         >
           <IonHeader>
             <IonToolbar>
@@ -1453,7 +1448,6 @@ const Groups: React.FC = () => {
           </IonContent>
         </IonModal>
       </IonContent>
-      <BottomNav />
     </IonPage>
   );
 };

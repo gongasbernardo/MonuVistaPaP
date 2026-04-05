@@ -20,7 +20,6 @@ import authService from "../services/authService";
 import challengeService from "../services/challengeService";
 import { API_URL } from "../config";
 import { COUNTRIES, REGIONS_BY_COUNTRY } from "../constants/locations";
-import BottomNav from "../components/BottomNav";
 import "./CreatePost.css";
 
 const CreatePost = () => {
@@ -249,7 +248,6 @@ const CreatePost = () => {
       </IonContent>
 
       <IonLoading isOpen={loading} message="A publicar..." />
-      <BottomNav />
     </IonPage>
   );
 };

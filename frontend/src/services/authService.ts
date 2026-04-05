@@ -44,22 +44,36 @@ class AuthService {
     return response.data;
   }
 
-  logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  async forgotPassword(email: string): Promise<AuthResponse> {
+    const response = await axios.post(`${API_URL}/forgot-password`, { email });
+    return response.data;
+  }
+
+  async resetPassword(resetToken: string, newPassword: string): Promise<AuthResponse> {
+    const response = await axios.post(`${API_URL}/reset-password`, {
+      resetToken,
+      newPassword
+    });
+    return response.data;
+  }
+
+  isAuthenticated(): boolean {
+    const token = localStorage.getItem('token');
+    return !!token;
   }
 
   getToken(): string | null {
     return localStorage.getItem('token');
   }
 
-  getUser() {
-    const user = localStorage.getItem('user');
-    return user ? JSON.parse(user) : null;
+  getUser(): any {
+    const userStr = localStorage.getItem('user');
+    return userStr ? JSON.parse(userStr) : null;
   }
 
-  isAuthenticated(): boolean {
-    return !!this.getToken();
+  logout(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
   }
 }
 

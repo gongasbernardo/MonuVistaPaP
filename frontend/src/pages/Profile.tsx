@@ -36,7 +36,6 @@ import { useHistory } from "react-router-dom";
 import axios from "axios";
 import authService from "../services/authService";
 import { API_URL } from "../config";
-import BottomNav from "../components/BottomNav";
 import "./Profile.css";
 
 interface Badge {
@@ -240,13 +239,17 @@ const Profile = () => {
             <p>A carregar perfil...</p>
           </div>
         </IonContent>
-        <BottomNav />
       </IonPage>
     );
   }
 
   return (
     <IonPage>
+      <IonHeader className="profile-header">
+        <IonToolbar>
+          <IonTitle>Perfil</IonTitle>
+        </IonToolbar>
+      </IonHeader>
       <IonContent className="profile-content" fullscreen>
         {/* Hero Header */}
         <div className="profile-hero">
@@ -692,8 +695,6 @@ const Profile = () => {
         onDidDismiss={() => setShowToast(false)}
         position="top"
       />
-
-      <BottomNav />
     </IonPage>
   );
 };

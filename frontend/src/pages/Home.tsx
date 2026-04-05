@@ -1,9 +1,6 @@
-import { useState, useEffect, useMemo, lazy, Suspense } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import {
   IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
   IonContent,
   IonIcon,
 } from "@ionic/react";
@@ -16,7 +13,7 @@ import authService from "../services/authService";
 import challengeService from "../services/challengeService";
 import axios from "axios";
 import { API_URL } from "../config";
-import BottomNav from "../components/BottomNav";
+import Skeleton from "../components/Skeleton";
 import "./Home.css";
 
 // Lazy-loaded map component for performance
@@ -124,7 +121,7 @@ const MAP_MONUMENTS: MapMonument[] = [
   // Terceira — coordenadas exatas
   { name: "Centro Histórico de Angra do Heroísmo", location: "Angra do Heroísmo, Terceira", country: "Portugal", lat: 38.6569, lng: -27.2237, century: "XVI", style: "Património UNESCO" },
   { name: "Sé de Angra do Heroísmo", location: "Angra do Heroísmo, Terceira", country: "Portugal", lat: 38.6563, lng: -27.2219, century: "XVI", style: "Religioso" },
-  { name: "Monte Brasil", location: "Angra do Heroísmo, Terceira", country: "Portugal", lat: 38.6505, lng: -27.2367, century: "-", style: "Natureza/Vulcânico" },
+  { name: "Monte Brasil", location: "Angra do Heroísmo, Terceira", country: "Portugal", lat: 38.645348, lng: -27.225827, century: "-", style: "Natureza/Vulcânico" },
   { name: "Castelo de São João Baptista", location: "Angra do Heroísmo, Terceira", country: "Portugal", lat: 38.6528, lng: -27.2355, century: "XVI", style: "Militar" },
   { name: "Castelo de São Sebastião", location: "Angra do Heroísmo, Terceira", country: "Portugal", lat: 38.6588, lng: -27.2135, century: "XVI", style: "Militar" },
   { name: "Convento de São Francisco (Museu de Angra)", location: "Angra do Heroísmo, Terceira", country: "Portugal", lat: 38.6558, lng: -27.2231, century: "XVII", style: "Cultural" },
@@ -149,19 +146,19 @@ const MAP_MONUMENTS: MapMonument[] = [
   { name: "Mata da Serreta", location: "Serreta, Terceira", country: "Portugal", lat: 38.7700, lng: -27.3500, century: "-", style: "Natureza/Floresta" },
   { name: "Rocha do Chambre", location: "Terceira", country: "Portugal", lat: 38.7600, lng: -27.2600, century: "-", style: "Geologia Vulcânica" },
   { name: "Ponta das Contendas", location: "Terceira", country: "Portugal", lat: 38.6410, lng: -27.0900, century: "-", style: "Reserva Natural" },
-  { name: "Igreja de São Salvador", location: "Santa Cruz da Graciosa, Graciosa", country: "Portugal", lat: 39.0848, lng: -28.0058, century: "XVI", style: "Manuelino" },
-  { name: "Ermida de Nossa Sra. da Ajuda", location: "Santa Cruz da Graciosa, Graciosa", country: "Portugal", lat: 39.0916, lng: -27.9841, century: "XVI", style: "Religioso" },
-  { name: "Igreja de Santa Bárbara", location: "Manadas, São Jorge", country: "Portugal", lat: 38.6748, lng: -28.1697, century: "XVIII", style: "Barroco" },
-  { name: "Forte de Santa Cruz", location: "Horta, Faial", country: "Portugal", lat: 38.5333, lng: -28.6250, century: "XVI", style: "Militar" },
-  { name: "Igreja Matriz do Santíssimo Salvador", location: "Horta, Faial", country: "Portugal", lat: 38.5350, lng: -28.6250, century: "XVII", style: "Barroco" },
-  { name: "Igreja de São Roque", location: "São Roque do Pico, Pico", country: "Portugal", lat: 38.5175, lng: -28.3197, century: "XVII", style: "Barroco" },
-  { name: "Paisagem da Vinha do Pico", location: "Criação Velha, Pico", country: "Portugal", lat: 38.5115, lng: -28.4290, century: "XV", style: "Paisagem Cultural UNESCO" },
+  { name: "Igreja de São Salvador", location: "Santa Cruz da Graciosa, Graciosa", country: "Portugal", lat: 39.0348, lng: -28.0000, century: "XVI", style: "Manuelino" },
+  { name: "Ermida de Nossa Sra. da Ajuda", location: "Santa Cruz da Graciosa, Graciosa", country: "Portugal", lat: 39.0350, lng: -28.0020, century: "XVI", style: "Religioso" },
+  { name: "Igreja de Santa Bárbara", location: "Manadas, São Jorge", country: "Portugal", lat: 38.6748, lng: -28.0697, century: "XVIII", style: "Barroco" },
+  { name: "Forte de Santa Cruz", location: "Horta, Faial", country: "Portugal", lat: 38.5333, lng: -28.7250, century: "XVI", style: "Militar" },
+  { name: "Igreja Matriz do Santíssimo Salvador", location: "Horta, Faial", country: "Portugal", lat: 38.5350, lng: -28.7250, century: "XVII", style: "Barroco" },
+  { name: "Igreja de São Roque", location: "São Roque do Pico, Pico", country: "Portugal", lat: 38.4575, lng: -28.3697, century: "XVII", style: "Barroco" },
+  { name: "Paisagem da Vinha do Pico", location: "Criação Velha, Pico", country: "Portugal", lat: 38.4500, lng: -28.4290, century: "XV", style: "Paisagem Cultural UNESCO" },
   { name: "Museu dos Baleeiros", location: "Lajes do Pico, Pico", country: "Portugal", lat: 38.3897, lng: -28.2595, century: "XIX", style: "Industrial/Cultural" },
-  { name: "Forte de São Brás (Flores)", location: "Santa Cruz das Flores, Flores", country: "Portugal", lat: 39.4533, lng: -31.1278, century: "XVI", style: "Militar" },
+  { name: "Forte de São Brás (Flores)", location: "Santa Cruz das Flores, Flores", country: "Portugal", lat: 39.4533, lng: -31.1878, century: "XVI", style: "Militar" },
   { name: "Igreja de Nossa Sra. da Conceição", location: "Vila do Corvo, Corvo", country: "Portugal", lat: 39.6745, lng: -31.1107, century: "XVII", style: "Religioso" },
   // ========== MADEIRA ==========
   { name: "Sé do Funchal", location: "Funchal, Madeira", country: "Portugal", lat: 32.6488, lng: -16.9080, century: "XV", style: "Manuelino/Gótico" },
-  { name: "Fortaleza de São Tiago", location: "Funchal, Madeira", country: "Portugal", lat: 32.6454, lng: -16.9027, century: "XVII", style: "Militar" },
+  { name: "Fortaleza de São Tiago", location: "Funchal, Madeira", country: "Portugal", lat: 32.6454, lng: -16.9127, century: "XVII", style: "Militar" },
   { name: "Fortaleza do Pico", location: "Funchal, Madeira", country: "Portugal", lat: 32.6486, lng: -16.9042, century: "XVI", style: "Militar" },
   { name: "Igreja do Colégio", location: "Funchal, Madeira", country: "Portugal", lat: 32.6498, lng: -16.9098, century: "XVII", style: "Jesuíta/Barroco" },
   { name: "Convento de Santa Clara", location: "Funchal, Madeira", country: "Portugal", lat: 32.6503, lng: -16.9073, century: "XV", style: "Gótico/Manuelino" },
@@ -230,6 +227,8 @@ const Home = () => {
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [selectedMonument, setSelectedMonument] = useState<MapMonument | null>(null);
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [loadingChallenges, setLoadingChallenges] = useState(true);
 
   useEffect(() => {
     const userData = authService.getUser();
@@ -250,6 +249,8 @@ const Home = () => {
       }
     } catch (error) {
       console.error("Erro ao carregar stats:", error);
+    } finally {
+      setLoadingStats(false);
     }
   };
 
@@ -264,6 +265,8 @@ const Home = () => {
       setChallenges(data);
     } catch (error) {
       console.error("Erro ao carregar desafios:", error);
+    } finally {
+      setLoadingChallenges(false);
     }
   };
 
@@ -281,39 +284,54 @@ const Home = () => {
 
   return (
     <IonPage>
-      <IonHeader className="home-header">
-        <IonToolbar>
-          <div className="header-content">
-            <IonTitle>MonuVista</IonTitle>
-          </div>
-        </IonToolbar>
-      </IonHeader>
-
       <IonContent className="home-content">
         {/* 1. USER SUMMARY — real data */}
         <div className="user-summary-card">
           <div className="user-info">
-            <div className="avatar">{user?.name?.charAt(0) || "U"}</div>
-            <div className="user-details">
-              <h2>{user?.name || "Utilizador"}</h2>
-              <p className="cultural-level">
-                Nível {userStats?.level || 1} - {userStats?.levelTitle || "Iniciante"}
-              </p>
-            </div>
+            {loadingStats ? (
+              <>
+                <Skeleton className="avatar" width="70px" height="70px" borderRadius="50%" />
+                <div className="user-details">
+                  <Skeleton width="150px" height="24px" />
+                  <Skeleton width="120px" height="16px" />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="avatar">{user?.name?.charAt(0) || "U"}</div>
+                <div className="user-details">
+                  <h2>{user?.name || "Utilizador"}</h2>
+                  <p className="cultural-level">
+                    Nível {userStats?.level || 1} - {userStats?.levelTitle || "Iniciante"}
+                  </p>
+                </div>
+              </>
+            )}
           </div>
           <div className="user-stats">
-            <div className="stat">
-              <span className="stat-number">{userStats?.discoveries ?? 0}</span>
-              <span className="stat-label">Descobertas</span>
-            </div>
-            <div className="stat">
-              <span className="stat-number">{userStats?.badgesCount ?? 0}</span>
-              <span className="stat-label">Badges</span>
-            </div>
-            <div className="stat">
-              <span className="stat-number">{userStats?.groupsCount ?? 0}</span>
-              <span className="stat-label">Grupos</span>
-            </div>
+            {loadingStats ? (
+              Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="stat">
+                  <Skeleton width="30px" height="24px" />
+                  <Skeleton width="60px" height="14px" />
+                </div>
+              ))
+            ) : (
+              <>
+                <div className="stat">
+                  <span className="stat-number">{userStats?.discoveries ?? 0}</span>
+                  <span className="stat-label">Descobertas</span>
+                </div>
+                <div className="stat">
+                  <span className="stat-number">{userStats?.badgesCount ?? 0}</span>
+                  <span className="stat-label">Badges</span>
+                </div>
+                <div className="stat">
+                  <span className="stat-number">{userStats?.groupsCount ?? 0}</span>
+                  <span className="stat-label">Grupos</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -350,7 +368,20 @@ const Home = () => {
         {/* 3. ACTIVE CHALLENGES — real data */}
         <div className="section">
           <h3 className="section-title">Desafios Ativos</h3>
-          {challenges.length === 0 ? (
+          {loadingChallenges ? (
+            Array.from({ length: 2 }).map((_, index) => (
+              <div key={index} className="challenge-card">
+                <div className="challenge-header">
+                  <Skeleton width="24px" height="24px" borderRadius="50%" />
+                  <Skeleton width="200px" height="20px" />
+                </div>
+                <Skeleton width="100%" height="16px" />
+                <Skeleton width="100%" height="16px" />
+                <Skeleton width="80%" height="16px" />
+                <Skeleton width="120px" height="8px" borderRadius="4px" />
+              </div>
+            ))
+          ) : challenges.length === 0 ? (
             <p style={{ textAlign: "center", color: "#888", padding: "16px" }}>
               Sem desafios disponíveis
             </p>
@@ -402,7 +433,6 @@ const Home = () => {
         <div style={{ height: "80px" }}></div>
       </IonContent>
 
-      <BottomNav />
     </IonPage>
   );
 };

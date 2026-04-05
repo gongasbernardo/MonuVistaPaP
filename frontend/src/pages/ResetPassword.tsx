@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   IonContent,
   IonPage,
@@ -10,27 +10,43 @@ import {
   IonLoading,
   IonCard,
   IonCardContent,
-  IonIcon
+  IonIcon,
+  IonButtons,
+  IonHeader,
+  IonToolbar,
+  IonTitle
 } from '@ionic/react';
-import { personOutline, mailOutline, lockClosedOutline, eyeOutline, eyeOffOutline } from 'ionicons/icons';
-import { useHistory } from 'react-router-dom';
+import { lockClosedOutline, eyeOutline, eyeOffOutline, arrowBack } from 'ionicons/icons';
+import { useHistory, useParams } from 'react-router-dom';
 import authService from '../services/authService';
-import './Register.css';
+import './ResetPassword.css';
 
-const Register: React.FC = () => {
+const ResetPassword: React.FC = () => {
   const history = useHistory();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const { token } = useParams<{ token: string }>();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleRegister = async (e: React.FormEvent) => {
+  useEffect(() => {
+    if (!token) {
+      setError('Invalid reset token');
+    }
+  }, [token]);
+
+  const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
+
+    if (!token) {
+      setError('Invalid reset token');
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError('Passwords do not match');
@@ -45,12 +61,15 @@ const Register: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await authService.register({ name, email, password });
-      
+      const response = await authService.resetPassword(token, password);
+
       if (response.success) {
-        history.push('/home');
+        setSuccess('Password reset successfully! You can now log in with your new password.');
+        setTimeout(() => {
+          history.push('/login');
+        }, 3000);
       } else {
-        setError(response.message || 'Registration failed');
+        setError(response.message || 'Failed to reset password');
       }
     } catch (err: any) {
       setError(err.response?.data?.message || 'An error occurred');
@@ -61,46 +80,32 @@ const Register: React.FC = () => {
 
   return (
     <IonPage>
-      <IonContent className="register-content">
-        <div className="register-container">
-          <div className="register-header-content">
+      <IonHeader className="reset-header">
+        <IonToolbar color="transparent">
+          <IonButtons slot="start">
+            <IonButton onClick={() => history.push('/login')} className="back-button">
+              <IonIcon icon={arrowBack} />
+            </IonButton>
+          </IonButtons>
+          <IonTitle>Reset Password</IonTitle>
+        </IonToolbar>
+      </IonHeader>
+      <IonContent className="reset-content">
+        <div className="reset-container">
+          <div className="reset-header-content">
             <div className="logo-circle">
-              <IonIcon icon={personOutline} className="logo-icon" />
+              <IonIcon icon={lockClosedOutline} className="logo-icon" />
             </div>
-            <h1 className="app-title">Create Account</h1>
-            <p className="app-subtitle">Join MonuVista today</p>
+            <h1 className="app-title">Reset Password</h1>
+            <p className="app-subtitle">Enter your new password</p>
           </div>
 
-          <IonCard className="register-card">
+          <IonCard className="reset-card">
             <IonCardContent>
-              <form onSubmit={handleRegister}>
-                <IonItem lines="none" className="input-item">
-                  <IonIcon icon={personOutline} slot="start" className="input-icon" />
-                  <IonLabel position="floating">Full Name</IonLabel>
-                  <IonInput
-                    type="text"
-                    value={name}
-                    onIonChange={(e) => setName(e.detail.value!)}
-                    required
-                    className="custom-input"
-                  />
-                </IonItem>
-
-                <IonItem lines="none" className="input-item">
-                  <IonIcon icon={mailOutline} slot="start" className="input-icon" />
-                  <IonLabel position="floating">Email</IonLabel>
-                  <IonInput
-                    type="email"
-                    value={email}
-                    onIonChange={(e) => setEmail(e.detail.value!)}
-                    required
-                    className="custom-input"
-                  />
-                </IonItem>
-
+              <form onSubmit={handleResetPassword}>
                 <IonItem lines="none" className="input-item">
                   <IonIcon icon={lockClosedOutline} slot="start" className="input-icon" />
-                  <IonLabel position="floating">Password</IonLabel>
+                  <IonLabel position="floating">New Password</IonLabel>
                   <IonInput
                     type={showPassword ? 'text' : 'password'}
                     value={password}
@@ -118,7 +123,7 @@ const Register: React.FC = () => {
 
                 <IonItem lines="none" className="input-item">
                   <IonIcon icon={lockClosedOutline} slot="start" className="input-icon" />
-                  <IonLabel position="floating">Confirm Password</IonLabel>
+                  <IonLabel position="floating">Confirm New Password</IonLabel>
                   <IonInput
                     type={showConfirmPassword ? 'text' : 'password'}
                     value={confirmPassword}
@@ -135,35 +140,33 @@ const Register: React.FC = () => {
                 </IonItem>
 
                 {error && (
-                  <IonText color="danger" className="error-text">
+                  <IonText color="danger" className="error-message">
                     <p>{error}</p>
                   </IonText>
                 )}
 
-                <IonButton 
-                  expand="block" 
-                  type="submit" 
-                  disabled={loading} 
-                  className="register-button-submit"
-                >
-                  {loading ? 'Creating Account...' : 'Create Account'}
-                </IonButton>
+                {success && (
+                  <IonText color="success" className="success-message">
+                    <p>{success}</p>
+                  </IonText>
+                )}
 
-                <div className="login-link">
-                  <span>Already have an account? </span>
-                  <IonButton fill="clear" onClick={() => history.push('/login')} className="login-link-button">
-                    Login
-                  </IonButton>
-                </div>
+                <IonButton
+                  expand="block"
+                  type="submit"
+                  className="reset-button"
+                  disabled={loading || !token}
+                >
+                  {loading ? 'Resetting...' : 'Reset Password'}
+                </IonButton>
               </form>
             </IonCardContent>
           </IonCard>
         </div>
-        
-        <IonLoading isOpen={loading} message="Creating account..." />
       </IonContent>
+      <IonLoading isOpen={loading} message="Resetting password..." />
     </IonPage>
   );
 };
 
-export default Register;
+export default ResetPassword;

@@ -47,6 +47,16 @@ const userSchema = new mongoose.Schema({
     icon: String,
     earnedAt: { type: Date, default: Date.now }
   }],
+  favoriteMonuments: [{
+    name: String,
+    location: String,
+    addedAt: { type: Date, default: Date.now }
+  }],
+  visitedMonuments: [{
+    name: String,
+    location: String,
+    visitedAt: { type: Date, default: Date.now }
+  }],
   joinedChallenges: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Challenge'
@@ -87,6 +97,15 @@ const userSchema = new mongoose.Schema({
       default: Date.now
     }
   }],
+  // Password reset
+  resetToken: {
+    type: String,
+    default: null
+  },
+  resetTokenExpire: {
+    type: Date,
+    default: null
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -107,6 +126,17 @@ userSchema.pre('save', async function(next) {
 // Method to compare passwords
 userSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Method to generate reset token
+userSchema.methods.generateResetToken = function() {
+  const crypto = require('crypto');
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  
+  this.resetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+  this.resetTokenExpire = Date.now() + (30 * 60 * 1000); // 30 minutes
+  
+  return resetToken;
 };
 
 module.exports = mongoose.model('User', userSchema);

@@ -96,6 +96,17 @@ const Login: React.FC = () => {
                   </IonText>
                 )}
 
+                <div style={{ textAlign: 'right', marginBottom: '16px' }}>
+                  <IonButton 
+                    fill="clear" 
+                    size="small"
+                    onClick={() => history.push('/forgot-password')}
+                    style={{ margin: 0, padding: 0 }}
+                  >
+                    Forgot Password?
+                  </IonButton>
+                </div>
+
                 <IonButton 
                   expand="block" 
                   type="submit" 

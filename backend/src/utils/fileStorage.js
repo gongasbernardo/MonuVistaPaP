@@ -62,6 +62,51 @@ class FileStorage {
   async comparePassword(candidatePassword, hashedPassword) {
     return await bcrypt.compare(candidatePassword, hashedPassword);
   }
-}
+
+  // Atualizar token de reset
+  updateResetToken(email, token, expireTime) {
+    const users = this.readUsers();
+    const userIndex = users.findIndex(u => u.email === email.toLowerCase());
+    
+    if (userIndex !== -1) {
+      users[userIndex].resetToken = token;
+      users[userIndex].resetTokenExpire = expireTime;
+      this.saveUsers(users);
+    }
+  }
+
+  // Encontrar usuário por reset token
+  findUserByResetToken(token) {
+    const users = this.readUsers();
+    return users.find(u => 
+      u.resetToken === token && 
+      u.resetTokenExpire && 
+      u.resetTokenExpire > Date.now()
+    );
+  }
+
+  // Atualizar password
+  async updatePassword(email, newPassword) {
+    const users = this.readUsers();
+    const userIndex = users.findIndex(u => u.email === email.toLowerCase());
+    
+    if (userIndex !== -1) {
+      const salt = await bcrypt.genSalt(10);
+      users[userIndex].password = await bcrypt.hash(newPassword, salt);
+      this.saveUsers(users);
+    }
+  }
+
+  // Limpar token de reset
+  clearResetToken(email) {
+    const users = this.readUsers();
+    const userIndex = users.findIndex(u => u.email === email.toLowerCase());
+    
+    if (userIndex !== -1) {
+      users[userIndex].resetToken = null;
+      users[userIndex].resetTokenExpire = null;
+      this.saveUsers(users);
+    }
+  }}
 
 module.exports = new FileStorage();
