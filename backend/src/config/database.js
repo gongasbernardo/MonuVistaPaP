@@ -10,11 +10,17 @@ if (!fs.existsSync(dataDir)) {
 
 const connectDB = async () => {
   try {
+    const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/monuvista';
+
+    if (!process.env.MONGODB_URI) {
+      console.warn('MONGODB_URI not set, falling back to default local MongoDB URI');
+    }
+
     // Tentar conectar ao MongoDB
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
+    const conn = await mongoose.connect(mongoUri, {
       serverSelectionTimeoutMS: 5000
     });
-    
+
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.warn('MongoDB not available, using local file storage');

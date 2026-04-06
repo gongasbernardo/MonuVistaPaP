@@ -1,5 +1,5 @@
-import { Redirect, Route } from 'react-router-dom';
-import { IonApp, IonRouterOutlet, IonFab, IonFabButton, IonIcon, setupIonicReact } from '@ionic/react';
+import { Redirect, Route, useLocation } from 'react-router-dom';
+import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -12,9 +12,7 @@ import VisitPlace from './pages/VisitPlace';
 import Groups from './pages/Groups';
 import Profile from './pages/Profile';
 import AppNavbar from './components/AppNavbar';
-import SideMenu from './components/SideMenu';
 import authService from './services/authService';
-import { useState } from 'react';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -32,9 +30,6 @@ import '@ionic/react/css/text-transformation.css';
 import '@ionic/react/css/flex-utils.css';
 import '@ionic/react/css/display.css';
 
-/* Icons */
-import { menuOutline } from "ionicons/icons";
-
 setupIonicReact();
 
 const ProtectedRoute: React.FC<{ path: string; exact?: boolean; children: React.ReactNode }> = ({
@@ -47,56 +42,61 @@ const ProtectedRoute: React.FC<{ path: string; exact?: boolean; children: React.
   </Route>
 );
 
-const App: React.FC = () => {
-  const [sideMenuOpen, setSideMenuOpen] = useState(false);
+const AppRoutes: React.FC = () => {
+  const location = useLocation();
+  const isAuthRoute =
+    location.pathname === '/login' ||
+    location.pathname === '/register' ||
+    location.pathname === '/forgot-password' ||
+    location.pathname.startsWith('/reset-password');
 
+  return (
+    <>
+      {!isAuthRoute && <AppNavbar />}
+      <IonRouterOutlet className="app-router-outlet">
+        <Route exact path="/login">
+          <Login />
+        </Route>
+        <Route exact path="/register">
+          <Register />
+        </Route>
+        <Route exact path="/forgot-password">
+          <ForgotPassword />
+        </Route>
+        <Route exact path="/reset-password/:token">
+          <ResetPassword />
+        </Route>
+        <ProtectedRoute exact path="/home">
+          <Home />
+        </ProtectedRoute>
+        <ProtectedRoute exact path="/album">
+          <Album />
+        </ProtectedRoute>
+        <ProtectedRoute exact path="/community">
+          <Community />
+        </ProtectedRoute>
+        <ProtectedRoute exact path="/groups">
+          <Groups />
+        </ProtectedRoute>
+        <ProtectedRoute exact path="/visit">
+          <VisitPlace />
+        </ProtectedRoute>
+        <ProtectedRoute exact path="/profile">
+          <Profile />
+        </ProtectedRoute>
+        <Route exact path="/">
+          <Redirect to="/login" />
+        </Route>
+      </IonRouterOutlet>
+    </>
+  );
+};
+
+const App: React.FC = () => {
   return (
     <IonApp>
       <IonReactRouter>
-        <AppNavbar />
-        <SideMenu isOpen={sideMenuOpen} onClose={() => setSideMenuOpen(false)} />
-        <IonRouterOutlet className="app-router-outlet">
-          <Route exact path="/login">
-            <Login />
-          </Route>
-          <Route exact path="/register">
-            <Register />
-          </Route>
-          <Route exact path="/forgot-password">
-            <ForgotPassword />
-          </Route>
-          <Route exact path="/reset-password/:token">
-            <ResetPassword />
-          </Route>
-          <ProtectedRoute exact path="/home">
-            <Home />
-          </ProtectedRoute>
-          <ProtectedRoute exact path="/album">
-            <Album />
-          </ProtectedRoute>
-          <ProtectedRoute exact path="/community">
-            <Community />
-          </ProtectedRoute>
-          <ProtectedRoute exact path="/groups">
-            <Groups />
-          </ProtectedRoute>
-          <ProtectedRoute exact path="/visit">
-            <VisitPlace />
-          </ProtectedRoute>
-          <ProtectedRoute exact path="/profile">
-            <Profile />
-          </ProtectedRoute>
-          <Route exact path="/">
-            <Redirect to="/login" />
-          </Route>
-        </IonRouterOutlet>
-        {!authService.isAuthenticated() ? null : (
-          <IonFab vertical="bottom" horizontal="end" slot="fixed">
-            <IonFabButton onClick={() => setSideMenuOpen(true)}>
-              <IonIcon icon={menuOutline} />
-            </IonFabButton>
-          </IonFab>
-        )}
+        <AppRoutes />
       </IonReactRouter>
     </IonApp>
   );

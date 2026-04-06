@@ -23,6 +23,7 @@ import {
 } from "ionicons/icons";
 import albumService, { Folder } from "../services/albumService";
 import challengeService from "../services/challengeService";
+import visionService from "../services/visionService";
 import "./VisitPlace.css";
 
 interface Monument {
@@ -148,6 +149,7 @@ const VisitPlace = () => {
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [result, setResult] = useState<Monument | null>(null);
   const [showAddAlert, setShowAddAlert] = useState(false);
   const [selectedFolder, setSelectedFolder] = useState("default");
@@ -178,30 +180,28 @@ const VisitPlace = () => {
   const analyzeImage = async () => {
     if (!image) return;
 
+    setErrorMessage(null);
     setAnalyzing(true);
     setLoading(true);
 
-    // Simular processamento de IA (2-3 segundos)
-    await new Promise((resolve) => setTimeout(resolve, 2500));
+    try {
+      const monument = await visionService.recognizeMonument(image);
+      setResult({
+        ...monument,
+        confidence: Math.min(100, Math.max(60, Math.round(monument.confidence))),
+      });
 
-    // Selecionar um monumento aleatório da base de dados
-    const randomIndex = Math.floor(Math.random() * MONUMENTS_DATABASE.length);
-    const monument = MONUMENTS_DATABASE[randomIndex];
-
-    // Adicionar pequena variação na confiança
-    const confidence = monument.confidence + (Math.random() * 5 - 2.5);
-    
-    setResult({
-      ...monument,
-      confidence: Math.min(99, Math.max(85, Math.round(confidence))),
-    });
-    
-    // Verificar se já está no álbum
-    const inAlbum = await albumService.isInAlbum(monument.name);
-    setAlreadyInAlbum(inAlbum);
-    
-    setAnalyzing(false);
-    setLoading(false);
+      const inAlbum = await albumService.isInAlbum(monument.name);
+      setAlreadyInAlbum(inAlbum);
+    } catch (error: any) {
+      console.error('Vision error:', error);
+      setErrorMessage(
+        error?.message || 'Não foi possível reconhecer o monumento. Tente outra imagem.'
+      );
+    } finally {
+      setAnalyzing(false);
+      setLoading(false);
+    }
   };
 
   const reset = () => {
@@ -299,6 +299,11 @@ const VisitPlace = () => {
                     <IonIcon icon={closeCircleOutline} />
                   </button>
                 </div>
+                {errorMessage && (
+                  <div className="error-message">
+                    {errorMessage}
+                  </div>
+                )}
                 <IonButton
                   expand="block"
                   className="analyze-button"

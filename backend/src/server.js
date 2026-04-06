@@ -58,8 +58,7 @@ app.use('/api/posts', require('./routes/posts'));
 app.use('/api/groups', require('./routes/groups'));
 app.use('/api/stats', require('./routes/stats'));
 app.use('/api/challenges', require('./routes/challenges'));
-app.use('/api/album', require('./routes/album'));
-
+app.use('/api/album', require('./routes/album'));app.use('/api/vision', require('./routes/vision'));
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Server is running' });
