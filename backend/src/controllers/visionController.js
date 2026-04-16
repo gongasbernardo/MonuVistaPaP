@@ -95,7 +95,7 @@ exports.recognizeMonument = async (req, res) => {
     });
   }
 
-  const model = process.env.OLLAMA_MODEL || 'llava';
+  const model = process.env.OPENAI_MODEL || 'gpt-4o';
 
   try {
     // Extract base64 data
@@ -130,19 +130,28 @@ Rules:
 - If image quality is low or uncertain, use Unknown fields and low confidence.
 - Prefer Portuguese monuments when evidence supports it.`;
 
-    const result = await client.chat({
+    const result = await client.chat.completions.create({
       model,
-      format: 'json',
+      response_format: { type: 'json_object' },
       messages: [
         {
           role: 'user',
-          content: prompt,
-          images: [base64Data],
+          content: [
+            { type: 'text', text: prompt },
+            {
+              type: 'image_url',
+              image_url: {
+                url: `data:image/jpeg;base64,${base64Data}`,
+                detail: 'high',
+              },
+            },
+          ],
         },
       ],
+      max_tokens: 1000,
     });
 
-    const responseText = result.message.content;
+    const responseText = result.choices[0].message.content;
 
     if (!responseText) {
       throw new Error('Não foi possível ler a resposta da IA.');
@@ -173,7 +182,7 @@ Rules:
     if (String(error?.message || '').toLowerCase().includes('model')) {
       return res.status(503).json({
         success: false,
-        message: 'Modelo de visão não disponível no Ollama. Confirme OLLAMA_MODEL e faça pull do modelo.',
+        message: 'Modelo de visão não disponível na OpenAI. Confirme OPENAI_MODEL e a sua API key.',
         error: error.message || error.toString(),
       });
     }

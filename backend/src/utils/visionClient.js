@@ -1,7 +1,7 @@
-const { Ollama } = require('ollama');
+const OpenAI = require('openai');
 
-const client = new Ollama({
-  host: process.env.OLLAMA_HOST || 'http://localhost:11434',
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 module.exports = client;
