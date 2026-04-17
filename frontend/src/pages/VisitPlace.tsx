@@ -39,111 +39,6 @@ interface Monument {
   confidence: number;
 }
 
-// Simulação de base de dados de monumentos
-const MONUMENTS_DATABASE: Monument[] = [
-  {
-    name: "Torre de Belém",
-    location: "Belém, Lisboa",
-    country: "Portugal",
-    region: "Lisboa",
-    century: "XVI",
-    style: "Manuelino",
-    description: "Fortificação construída no século XVI para defesa da barra do Tejo.",
-    history: "Construída entre 1514 e 1519 por ordem de D. Manuel I, a torre serviu como sistema defensivo da entrada do rio Tejo e como ponto de partida para os navegadores portugueses. É considerada um dos exemplos mais emblemáticos da arquitetura manuelina.",
-    funFacts: [
-      "É Património Mundial da UNESCO desde 1983",
-      "Foi prisão política durante o regime absolutista",
-      "Possui elementos decorativos únicos como cordas esculpidas em pedra",
-      "A torre tem 30 metros de altura"
-    ],
-    confidence: 95,
-  },
-  {
-    name: "Castelo de São Jorge",
-    location: "Lisboa",
-    country: "Portugal",
-    region: "Lisboa",
-    century: "XI",
-    style: "Medieval",
-    description: "Castelo medieval que domina a colina mais alta de Lisboa.",
-    history: "Construído pelos mouros no século XI, o castelo foi conquistado por D. Afonso Henriques em 1147. Serviu como residência real até ao século XVI e sofreu grandes danos no terramoto de 1755. Foi restaurado no século XX.",
-    funFacts: [
-      "Oferece vistas panorâmicas de 360° sobre Lisboa",
-      "Abriga ruínas que datam do século VII a.C.",
-      "Os jardins têm pavões selvagens",
-      "Foi palácio real durante 400 anos"
-    ],
-    confidence: 92,
-  },
-  {
-    name: "Mosteiro dos Jerónimos",
-    location: "Belém, Lisboa",
-    country: "Portugal",
-    region: "Lisboa",
-    century: "XVI",
-    style: "Manuelino",
-    description: "Magnífico mosteiro que representa o auge da arte manuelina.",
-    history: "Mandado construir por D. Manuel I em 1501, financiado com ouro do comércio de especiarias. Demorou 100 anos a construir e é um dos mais importantes exemplos da arquitetura manuelina. Alberga os túmulos de Vasco da Gama e Luís de Camões.",
-    funFacts: [
-      "Património Mundial da UNESCO",
-      "Sobreviveu ao terramoto de 1755 quase intacto",
-      "A igreja tem 25 metros de altura",
-      "Foi convento da Ordem de São Jerónimo durante 400 anos"
-    ],
-    confidence: 94,
-  },
-  {
-    name: "Torre dos Clérigos",
-    location: "Porto",
-    country: "Portugal",
-    region: "Porto",
-    century: "XVIII",
-    style: "Barroco",
-    description: "Icónica torre barroca e um dos símbolos da cidade do Porto.",
-    history: "Construída entre 1754 e 1763 pelo arquiteto Nicolau Nasoni, a Torre dos Clérigos é o ponto mais alto do Porto. Com 76 metros de altura, foi durante muito tempo o edifício mais alto de Portugal.",
-    funFacts: [
-      "Tem 240 degraus até ao topo",
-      "Os sinos tocam de hora a hora",
-      "Foi o primeiro edifício barroco oval em Portugal",
-      "Nasoni está enterrado na igreja dos Clérigos"
-    ],
-    confidence: 91,
-  },
-  {
-    name: "Palácio da Pena",
-    location: "Sintra",
-    country: "Portugal",
-    region: "Lisboa",
-    century: "XIX",
-    style: "Romântico",
-    description: "Palácio colorido no topo da Serra de Sintra, obra-prima do Romantismo.",
-    history: "Construído em 1854 por ordem do rei D. Fernando II sobre as ruínas de um antigo mosteiro. Combina diversos estilos arquitetónicos como gótico, manuelino, mourisco e renascentista. As suas cores vibrantes e localização única fazem dele um dos monumentos mais fotografados de Portugal.",
-    funFacts: [
-      "Foi escolhido como uma das Sete Maravilhas de Portugal",
-      "As cores originais eram ocre e vermelho",
-      "Está a 500 metros de altitude",
-      "Foi a última residência da família real portuguesa"
-    ],
-    confidence: 93,
-  },
-  {
-    name: "Aqueduto das Águas Livres",
-    location: "Lisboa",
-    country: "Portugal",
-    region: "Lisboa",
-    century: "XVIII",
-    style: "Barroco",
-    description: "Impressionante aqueduto com 58 km de extensão total.",
-    history: "Construído entre 1731 e 1799 para levar água potável a Lisboa. A sua arcada monumental sobre o Vale de Alcântara tem 35 arcos, sendo o maior com 65 metros de altura. Sobreviveu ao terramoto de 1755.",
-    funFacts: [
-      "O arco maior tem 65 metros de altura",
-      "Transportou água para Lisboa até 1967",
-      "Ficou conhecido pelos crimes do 'Diogo Alves'",
-      "É possível caminhar sobre o aqueduto em visitas guiadas"
-    ],
-    confidence: 89,
-  },
-];
 
 const VisitPlace = () => {
   const [image, setImage] = useState<string | null>(null);
@@ -338,10 +233,6 @@ const VisitPlace = () => {
             {/* Image Result */}
             <div className="result-image">
               <img src={image!} alt={result.name} />
-              <div className="confidence-badge">
-                <IonIcon icon={sparklesOutline} />
-                {result.confidence}% confiança
-              </div>
             </div>
 
             {/* Monument Info */}
