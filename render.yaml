@@ -1,0 +1,18 @@
+services:
+  - type: web_service
+    name: monuvista-backend
+    env: node
+    plan: starter
+    branch: main
+    root: backend
+    buildCommand: npm install
+    startCommand: npm start
+
+  - type: web_service
+    name: monuvista-frontend
+    env: node
+    plan: starter
+    branch: main
+    root: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
