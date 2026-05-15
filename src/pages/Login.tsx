@@ -48,18 +48,19 @@ const Login: React.FC = () => {
   return (
     <IonPage>
       <IonContent className="login-content">
-        <div className="login-container">
-          <div className="login-header">
-            <div className="logo-circle">
-              <IonIcon icon={lockClosedOutline} className="logo-icon" />
+        <div className="container py-5">
+          <div className="login-container mx-auto">
+            <div className="login-header text-center">
+              <div className="logo-circle mx-auto">
+                <IonIcon icon={lockClosedOutline} className="logo-icon" />
+              </div>
+              <h1 className="app-title">MonuVista</h1>
+              <p className="app-subtitle">Welcome back! Please login to continue</p>
             </div>
-            <h1 className="app-title">MonuVista</h1>
-            <p className="app-subtitle">Welcome back! Please login to continue</p>
-          </div>
 
-          <IonCard className="login-card">
-            <IonCardContent>
-              <form onSubmit={handleLogin}>
+            <IonCard className="login-card form-card">
+              <IonCardContent>
+                <form onSubmit={handleLogin}>
                 <IonItem lines="none" className="input-item">
                   <IonIcon icon={mailOutline} slot="start" className="input-icon" />
                   <IonLabel position="floating">Email</IonLabel>

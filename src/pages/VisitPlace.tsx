@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   IonPage,
   IonHeader,
@@ -21,6 +21,7 @@ import {
   addCircleOutline,
   checkmarkCircleOutline,
 } from "ionicons/icons";
+import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import albumService, { Folder } from "../services/albumService";
 import challengeService from "../services/challengeService";
 import visionService from "../services/visionService";
@@ -52,35 +53,59 @@ const VisitPlace = () => {
   const [alreadyInAlbum, setAlreadyInAlbum] = useState(false);
   const [showFolderPicker, setShowFolderPicker] = useState(false);
   const [pendingVisited, setPendingVisited] = useState(true);
-  const [captureMode, setCaptureMode] = useState<'environment' | undefined>(undefined);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [folders, setFolders] = useState<Folder[]>([]);
 
   useEffect(() => {
     albumService.getFolders().then(setFolders).catch(console.error);
   }, []);
 
+  const handleImageFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result as string;
+      setImage(result);
+      setResult(null);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        setImage(result);
-        setResult(null);
-      };
-      reader.readAsDataURL(file);
+      handleImageFile(file);
     }
   };
 
-  const openCamera = () => {
-    setCaptureMode('environment');
-    fileInputRef.current?.click();
+  const openCamera = async () => {
+    try {
+      const photo = await Camera.getPhoto({
+        quality: 90,
+        resultType: CameraResultType.DataUrl,
+        source: CameraSource.Camera,
+      });
+      if (photo && photo.dataUrl) {
+        setImage(photo.dataUrl);
+        setResult(null);
+      }
+    } catch (error) {
+      console.warn("Camera error:", error);
+    }
   };
 
-  const openGallery = () => {
-    setCaptureMode(undefined);
-    fileInputRef.current?.click();
+  const openGallery = async () => {
+    try {
+      const photo = await Camera.getPhoto({
+        quality: 90,
+        resultType: CameraResultType.DataUrl,
+        source: CameraSource.Photos,
+      });
+      if (photo && photo.dataUrl) {
+        setImage(photo.dataUrl);
+        setResult(null);
+      }
+    } catch (error) {
+      console.warn("Gallery error:", error);
+    }
   };
 
   const analyzeImage = async () => {
@@ -151,10 +176,6 @@ const VisitPlace = () => {
     setShowAddAlert(false);
   };
 
-  const takePhoto = () => {
-    fileInputRef.current?.click();
-  };
-
   return (
     <IonPage>
       <IonHeader className="visit-header">
@@ -198,8 +219,7 @@ const VisitPlace = () => {
                 </IonButton>
                 <IonButton
                   expand="block"
-                  fill="outline"
-                  className="gallery-button"
+                  className="camera-button"
                   onClick={openGallery}
                 >
                   Selecionar da Galeria
@@ -231,21 +251,12 @@ const VisitPlace = () => {
                   expand="block"
                   fill="outline"
                   className="retake-button"
-                  onClick={takePhoto}
+                  onClick={openGallery}
                 >
                   Escolher Outra Imagem
                 </IonButton>
               </div>
             )}
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              capture={captureMode}
-              onChange={handleImageChange}
-              style={{ display: "none" }}
-            />
           </div>
         ) : (
           <div className="result-section">
