@@ -13,8 +13,8 @@ services:
     env: node
     plan: starter
     branch: main
-    buildCommand: npm ci && npm run build
-    startCommand: npm run start
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm start
     envVars:
       - key: VITE_API_URL
         value: https://monuvista-backend.onrender.com
