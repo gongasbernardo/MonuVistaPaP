@@ -52,6 +52,7 @@ const VisitPlace = () => {
   const [alreadyInAlbum, setAlreadyInAlbum] = useState(false);
   const [showFolderPicker, setShowFolderPicker] = useState(false);
   const [pendingVisited, setPendingVisited] = useState(true);
+  const [captureMode, setCaptureMode] = useState<'environment' | undefined>(undefined);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [folders, setFolders] = useState<Folder[]>([]);
 
@@ -70,6 +71,16 @@ const VisitPlace = () => {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const openCamera = () => {
+    setCaptureMode('environment');
+    fileInputRef.current?.click();
+  };
+
+  const openGallery = () => {
+    setCaptureMode(undefined);
+    fileInputRef.current?.click();
   };
 
   const analyzeImage = async () => {
@@ -180,10 +191,18 @@ const VisitPlace = () => {
                 <IonButton
                   expand="block"
                   className="camera-button"
-                  onClick={takePhoto}
+                  onClick={openCamera}
                 >
                   <IonIcon icon={cameraOutline} slot="start" />
-                  Tirar Foto / Selecionar Imagem
+                  Tirar Foto
+                </IonButton>
+                <IonButton
+                  expand="block"
+                  fill="outline"
+                  className="gallery-button"
+                  onClick={openGallery}
+                >
+                  Selecionar da Galeria
                 </IonButton>
               </div>
             ) : (
@@ -223,7 +242,7 @@ const VisitPlace = () => {
               ref={fileInputRef}
               type="file"
               accept="image/*"
-              capture="environment"
+              capture={captureMode}
               onChange={handleImageChange}
               style={{ display: "none" }}
             />
