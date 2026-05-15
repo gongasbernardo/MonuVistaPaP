@@ -33,10 +33,10 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
+    "build": "npx tsc && npx vite build",
+    "preview": "npx vite preview",
     "start": "node server.js",
-    "cap:build": "tsc && vite build && npx cap sync",
+    "cap:build": "npx tsc && npx vite build && npx cap sync",
     "cap:open": "npx cap open android",
     "cap:sync": "npx cap sync",
     "cap:run": "npx cap run android"
