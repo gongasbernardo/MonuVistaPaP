@@ -19,5 +19,3 @@ services:
     envVars:
       - key: VITE_API_URL
         value: https://monuvista-backend.onrender.com
-      - key: NODE_ENV
-        value: production
