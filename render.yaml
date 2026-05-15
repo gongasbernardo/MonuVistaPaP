@@ -13,7 +13,6 @@ services:
     env: node
     plan: starter
     branch: main
-    root: .
     buildCommand: npm install --include=dev && npm run build
     startCommand: npm start
     envVars:
