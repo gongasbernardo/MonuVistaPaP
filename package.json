@@ -33,7 +33,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "npx tsc && npx vite build",
     "preview": "vite preview",
     "start": "node server.js",
     "cap:build": "tsc && vite build && npx cap sync",
