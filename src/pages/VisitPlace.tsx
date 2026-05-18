@@ -5,11 +5,8 @@ import {
   IonToolbar,
   IonTitle,
   IonContent,
-  IonButton,
   IonIcon,
   IonLoading,
-  IonCard,
-  IonCardContent,
 } from "@ionic/react";
 import {
   cameraOutline,
@@ -181,7 +178,7 @@ const VisitPlace = () => {
       <IonHeader className="visit-header">
         <IonToolbar>
           <IonTitle>
-            <IonIcon icon={sparklesOutline} style={{ marginRight: "8px" }} />
+            <IonIcon icon={sparklesOutline} style={{ marginRight: '8px' }} />
             Identificar Monumento
           </IonTitle>
         </IonToolbar>
@@ -190,224 +187,210 @@ const VisitPlace = () => {
       <IonContent className="visit-content">
         <IonLoading
           isOpen={loading}
-          message={analyzing ? "A analisar imagem com IA..." : "A processar..."}
+          message={analyzing ? 'A analisar imagem com IA...' : 'A processar...'}
         />
 
-        {!result ? (
-          <div className="upload-section">
-            <div className="ai-banner">
-              <IonIcon icon={sparklesOutline} className="ai-icon" />
-              <h2>Inteligência Artificial</h2>
-              <p>
-                Tire uma foto ou carregue uma imagem de um monumento e a nossa
-                IA irá identificá-lo e mostrar informações detalhadas
-              </p>
-            </div>
-
-            {!image ? (
-              <div className="camera-prompt">
-                <IonIcon icon={cameraOutline} className="camera-icon" />
-                <h3>Capture um Monumento</h3>
-                <p>Tire uma foto ou selecione uma imagem da galeria</p>
-                <IonButton
-                  expand="block"
-                  className="camera-button"
-                  onClick={openCamera}
-                >
-                  <IonIcon icon={cameraOutline} slot="start" />
-                  Tirar Foto
-                </IonButton>
-                <IonButton
-                  expand="block"
-                  className="camera-button"
-                  onClick={openGallery}
-                >
-                  Selecionar da Galeria
-                </IonButton>
+        <div className="container py-4">
+          {!result ? (
+            <div className="visit-card overflow-hidden">
+              <div className="visit-banner text-center">
+                <IonIcon icon={sparklesOutline} className="ai-icon" />
+                <h2>Inteligência Artificial</h2>
+                <p>Tire uma foto ou carregue uma imagem de um monumento e a nossa IA irá identificá-lo.</p>
               </div>
-            ) : (
-              <div className="preview-section">
-                <div className="image-preview-container">
-                  <img src={image} alt="Preview" className="preview-image" />
-                  <button className="remove-image" onClick={reset}>
-                    <IonIcon icon={closeCircleOutline} />
-                  </button>
-                </div>
-                {errorMessage && (
-                  <div className="error-message">
-                    {errorMessage}
+
+              <div className="card-body p-4">
+                {!image ? (
+                  <div className="text-center">
+                    <IonIcon icon={cameraOutline} className="camera-icon" />
+                    <h3 className="mb-2">Capture um Monumento</h3>
+                    <p className="text-muted mb-4">Tire uma foto ou selecione uma imagem da galeria.</p>
+                    <div className="d-grid gap-3">
+                      <button type="button" className="btn btn-brand" onClick={openCamera}>
+                        <IonIcon icon={cameraOutline} slot="start" />
+                        Tirar Foto
+                      </button>
+                      <button type="button" className="btn btn-outline-brand" onClick={openGallery}>
+                        Selecionar da Galeria
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="image-preview-container mb-4">
+                      <img src={image} alt="Preview" className="preview-image" />
+                      <button className="remove-image" onClick={reset}>
+                        <IonIcon icon={closeCircleOutline} />
+                      </button>
+                    </div>
+
+                    {errorMessage && (
+                      <div className="alert alert-warning auth-alert">{errorMessage}</div>
+                    )}
+
+                    <div className="d-grid gap-3">
+                      <button type="button" className="btn btn-brand" onClick={analyzeImage} disabled={analyzing}>
+                        <IonIcon icon={sparklesOutline} slot="start" />
+                        {analyzing ? 'A Analisar...' : 'Analisar com IA'}
+                      </button>
+                      <button type="button" className="btn btn-outline-brand" onClick={openGallery}>
+                        Escolher Outra Imagem
+                      </button>
+                    </div>
                   </div>
                 )}
-                <IonButton
-                  expand="block"
-                  className="analyze-button"
-                  onClick={analyzeImage}
-                  disabled={analyzing}
-                >
-                  <IonIcon icon={sparklesOutline} slot="start" />
-                  {analyzing ? "A Analisar..." : "Analisar com IA"}
-                </IonButton>
-                <IonButton
-                  expand="block"
-                  fill="outline"
-                  className="retake-button"
-                  onClick={openGallery}
-                >
-                  Escolher Outra Imagem
-                </IonButton>
               </div>
-            )}
-          </div>
-        ) : (
-          <div className="result-section">
-            {/* Image Result */}
-            <div className="result-image">
-              <img src={image!} alt={result.name} />
             </div>
-
-            {/* Monument Info */}
-            <div className="monument-info">
-              <h1 className="monument-name">{result.name}</h1>
-              
-              <div className="info-tags">
-                <span className="tag location-tag">
-                  <IonIcon icon={locationOutline} />
-                  {result.location}
-                </span>
-                <span className="tag time-tag">
-                  <IonIcon icon={timeOutline} />
-                  Século {result.century}
-                </span>
-                <span className="tag style-tag">
-                  {result.style}
-                </span>
-              </div>
-
-              <IonCard className="info-card">
-                <IonCardContent>
-                  <div className="info-section">
-                    <h3>
-                      <IonIcon icon={informationCircleOutline} />
-                      Descrição
-                    </h3>
-                    <p>{result.description}</p>
-                  </div>
-                </IonCardContent>
-              </IonCard>
-
-              <IonCard className="info-card">
-                <IonCardContent>
-                  <div className="info-section">
-                    <h3>
+          ) : (
+            <div className="result-section">
+              <div className="visit-card mb-4 overflow-hidden">
+                <img src={image!} alt={result.name} className="img-fluid" />
+                <div className="card-body">
+                  <h1 className="monument-name">{result.name}</h1>
+                  <div className="visit-meta">
+                    <span className="tag-pill">
+                      <IonIcon icon={locationOutline} />
+                      {result.location}
+                    </span>
+                    <span className="tag-pill">
                       <IonIcon icon={timeOutline} />
-                      História
-                    </h3>
-                    <p>{result.history}</p>
+                      Século {result.century}
+                    </span>
+                    <span className="tag-pill">
+                      {result.style}
+                    </span>
                   </div>
-                </IonCardContent>
-              </IonCard>
-
-              <IonCard className="info-card">
-                <IonCardContent>
-                  <div className="info-section">
-                    <h3>
-                      <IonIcon icon={sparklesOutline} />
-                      Curiosidades
-                    </h3>
-                    <ul className="fun-facts">
-                      {result.funFacts.map((fact, index) => (
-                        <li key={index}>{fact}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </IonCardContent>
-              </IonCard>
-
-              <IonButton
-                expand="block"
-                className="new-search-button"
-                onClick={reset}
-              >
-                <IonIcon icon={cameraOutline} slot="start" />
-                Analisar Outro Monumento
-              </IonButton>
-
-              {!alreadyInAlbum && (
-                <IonButton
-                  expand="block"
-                  color="success"
-                  className="add-album-button"
-                  onClick={() => setShowAddAlert(true)}
-                >
-                  <IonIcon icon={addCircleOutline} slot="start" />
-                  Adicionar ao Álbum
-                </IonButton>
-              )}
-
-              {alreadyInAlbum && (
-                <div className="already-added">
-                  <IonIcon icon={checkmarkCircleOutline} />
-                  <span>Já está no seu álbum</span>
                 </div>
-              )}
-            </div>
-          </div>
-        )}
+              </div>
 
-        {/* Custom overlay para adicionar ao álbum */}
-        {showAddAlert && (
-          <div className="custom-alert-overlay" onClick={() => setShowAddAlert(false)}>
-            <div className="custom-alert" onClick={e => e.stopPropagation()}>
-              <h3>Adicionar ao Álbum</h3>
-              <p style={{ fontSize: 13, color: '#666', marginBottom: 12 }}>Escolha o estado da visita</p>
-              <label className="custom-radio">
-                <input type="radio" name="visitState" value="visited" checked={pendingVisited} onChange={() => setPendingVisited(true)} />
-                Visitado (guarda data automaticamente)
-              </label>
-              <label className="custom-radio">
-                <input type="radio" name="visitState" value="tovisit" checked={!pendingVisited} onChange={() => setPendingVisited(false)} />
-                Por Visitar
-              </label>
-              <div className="custom-alert-buttons">
-                <button onClick={() => setShowAddAlert(false)}>Cancelar</button>
-                <button className="primary" onClick={() => {
-                  setShowAddAlert(false);
-                  setShowFolderPicker(true);
-                }}>Seguinte</button>
+              <div className="row g-4">
+                <div className="col-12 col-lg-6">
+                  <div className="card info-card">
+                    <div className="card-body info-section">
+                      <h3>
+                        <IonIcon icon={informationCircleOutline} />
+                        Descrição
+                      </h3>
+                      <p>{result.description}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-12 col-lg-6">
+                  <div className="card info-card">
+                    <div className="card-body info-section">
+                      <h3>
+                        <IonIcon icon={timeOutline} />
+                        História
+                      </h3>
+                      <p>{result.history}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-12">
+                  <div className="card info-card">
+                    <div className="card-body info-section">
+                      <h3>
+                        <IonIcon icon={sparklesOutline} />
+                        Curiosidades
+                      </h3>
+                      <ul className="fun-facts">
+                        {result.funFacts.map((fact, index) => (
+                          <li key={index}>{fact}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="d-grid gap-3 mt-4">
+                <button type="button" className="btn btn-brand" onClick={reset}>
+                  <IonIcon icon={cameraOutline} slot="start" />
+                  Analisar Outro Monumento
+                </button>
+                {!alreadyInAlbum ? (
+                  <button type="button" className="btn btn-secondary-brand" onClick={() => setShowAddAlert(true)}>
+                    <IonIcon icon={addCircleOutline} slot="start" />
+                    Adicionar ao Álbum
+                  </button>
+                ) : (
+                  <div className="alert alert-success rounded-4 d-flex align-items-center gap-2 p-3">
+                    <IonIcon icon={checkmarkCircleOutline} />
+                    Já está no seu álbum
+                  </div>
+                )}
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Custom overlay para escolher pasta */}
-        {showFolderPicker && (
-          <div className="custom-alert-overlay" onClick={() => setShowFolderPicker(false)}>
-            <div className="custom-alert" onClick={e => e.stopPropagation()}>
-              <h3>Escolher Pasta</h3>
-              {folders.map(f => (
-                <label key={f.id} className="custom-radio">
-                  <input
-                    type="radio"
-                    name="folderPick"
-                    value={f.id}
-                    checked={selectedFolder === f.id}
-                    onChange={() => setSelectedFolder(f.id)}
-                  />
-                  {f.name}
+          {showAddAlert && (
+            <div className="custom-alert-overlay" onClick={() => setShowAddAlert(false)}>
+              <div className="custom-alert" onClick={(e) => e.stopPropagation()}>
+                <h3>Adicionar ao Álbum</h3>
+                <p className="text-muted small mb-3">Escolha o estado da visita</p>
+                <label className="custom-radio">
+                  <input type="radio" name="visitState" value="visited" checked={pendingVisited} onChange={() => setPendingVisited(true)} />
+                  Visitado (guarda data automaticamente)
                 </label>
-              ))}
-              <div className="custom-alert-buttons">
-                <button onClick={() => setShowFolderPicker(false)}>Cancelar</button>
-                <button className="primary" onClick={() => {
-                  setShowFolderPicker(false);
-                  handleAddToAlbum(selectedFolder, pendingVisited);
-                }}>Confirmar</button>
+                <label className="custom-radio">
+                  <input type="radio" name="visitState" value="tovisit" checked={!pendingVisited} onChange={() => setPendingVisited(false)} />
+                  Por Visitar
+                </label>
+                <div className="custom-alert-buttons">
+                  <button type="button" className="btn btn-outline-brand" onClick={() => setShowAddAlert(false)}>
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-brand"
+                    onClick={() => {
+                      setShowAddAlert(false);
+                      setShowFolderPicker(true);
+                    }}
+                  >
+                    Seguinte
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-      </IonContent>
+          )}
 
+          {showFolderPicker && (
+            <div className="custom-alert-overlay" onClick={() => setShowFolderPicker(false)}>
+              <div className="custom-alert" onClick={(e) => e.stopPropagation()}>
+                <h3>Escolher Pasta</h3>
+                {folders.map((f) => (
+                  <label key={f.id} className="custom-radio" style={{ marginBottom: '0.75rem' }}>
+                    <input
+                      type="radio"
+                      name="folderPick"
+                      value={f.id}
+                      checked={selectedFolder === f.id}
+                      onChange={() => setSelectedFolder(f.id)}
+                    />
+                    {f.name}
+                  </label>
+                ))}
+                <div className="custom-alert-buttons">
+                  <button type="button" className="btn btn-outline-brand" onClick={() => setShowFolderPicker(false)}>
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-brand"
+                    onClick={() => {
+                      setShowFolderPicker(false);
+                      handleAddToAlbum(selectedFolder, pendingVisited);
+                    }}
+                  >
+                    Confirmar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </IonContent>
     </IonPage>
   );
 };

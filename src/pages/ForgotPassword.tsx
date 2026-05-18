@@ -1,17 +1,5 @@
 import { useState } from 'react';
-import {
-  IonContent,
-  IonPage,
-  IonItem,
-  IonLabel,
-  IonInput,
-  IonButton,
-  IonText,
-  IonLoading,
-  IonCard,
-  IonCardContent,
-  IonIcon
-} from '@ionic/react';
+import { IonContent, IonPage, IonIcon, IonLoading } from '@ionic/react';
 import { mailOutline, lockClosedOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
 import authService from '../services/authService';
@@ -35,7 +23,6 @@ const ForgotPassword: React.FC = () => {
 
     try {
       const response = await authService.forgotPassword(email);
-      
       if (response.success) {
         setSuccessMessage('Reset token sent! Enter it below to reset your password.');
         setStep('reset');
@@ -67,7 +54,6 @@ const ForgotPassword: React.FC = () => {
 
     try {
       const response = await authService.resetPassword(resetToken, newPassword);
-      
       if (response.success) {
         setSuccessMessage(response.message);
         setTimeout(() => {
@@ -85,138 +71,129 @@ const ForgotPassword: React.FC = () => {
 
   return (
     <IonPage>
-      <IonContent className="login-content">
-        <div className="login-container">
-          <div className="login-header">
-            <div className="logo-circle">
-              <IonIcon icon={lockClosedOutline} className="logo-icon" />
+      <IonContent className="auth-page">
+        <div className="container py-5">
+          <div className="row justify-content-center">
+            <div className="col-xl-5 col-lg-6 col-md-8">
+              <div className="auth-card">
+                <div className="auth-header">
+                  <div className="brand-badge">
+                    <IonIcon icon={lockClosedOutline} />
+                  </div>
+                  <h1 className="auth-title">MonuVista</h1>
+                  <p className="auth-subtitle">
+                    {step === 'email'
+                      ? 'Enter your email to reset your password'
+                      : 'Enter the reset token and create a new password'}
+                  </p>
+                </div>
+
+                <form onSubmit={step === 'email' ? handleRequestReset : handleResetPassword}>
+                  {step === 'email' ? (
+                    <div className="mb-4">
+                      <label className="form-label text-uppercase text-muted fw-bold small">Email Address</label>
+                      <div className="input-group input-group-lg shadow-sm rounded-3 overflow-hidden">
+                        <span className="input-group-text bg-white border-end-0">
+                          <IonIcon icon={mailOutline} />
+                        </span>
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                          className="form-control form-control-lg form-control-brand border-start-0"
+                          placeholder="you@example.com"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="mb-4">
+                        <label className="form-label text-uppercase text-muted fw-bold small">Reset Token</label>
+                        <input
+                          type="text"
+                          value={resetToken}
+                          onChange={(e) => setResetToken(e.target.value)}
+                          required
+                          className="form-control form-control-lg form-control-brand"
+                          placeholder="Paste token from email"
+                        />
+                      </div>
+                      <div className="mb-4">
+                        <label className="form-label text-uppercase text-muted fw-bold small">New Password</label>
+                        <div className="input-group input-group-lg shadow-sm rounded-3 overflow-hidden">
+                          <span className="input-group-text bg-white border-end-0">
+                            <IonIcon icon={lockClosedOutline} />
+                          </span>
+                          <input
+                            type="password"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            required
+                            className="form-control form-control-lg form-control-brand border-start-0"
+                            placeholder="New password"
+                          />
+                        </div>
+                      </div>
+                      <div className="mb-4">
+                        <label className="form-label text-uppercase text-muted fw-bold small">Confirm Password</label>
+                        <div className="input-group input-group-lg shadow-sm rounded-3 overflow-hidden">
+                          <span className="input-group-text bg-white border-end-0">
+                            <IonIcon icon={lockClosedOutline} />
+                          </span>
+                          <input
+                            type="password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            required
+                            className="form-control form-control-lg form-control-brand border-start-0"
+                            placeholder="Confirm password"
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {error && (
+                    <div className="alert alert-danger auth-alert" role="alert">
+                      {error}
+                    </div>
+                  )}
+
+                  {successMessage && (
+                    <div className="alert alert-success auth-alert" role="alert">
+                      {successMessage}
+                    </div>
+                  )}
+
+                  <div className="d-grid gap-3">
+                    <button type="submit" className="btn btn-brand" disabled={loading}>
+                      {step === 'email'
+                        ? loading ? 'Sending...' : 'Send Reset Link'
+                        : loading ? 'Resetting...' : 'Reset Password'}
+                    </button>
+                    {step === 'reset' && (
+                      <button
+                        type="button"
+                        className="btn btn-outline-brand"
+                        onClick={() => {
+                          setStep('email');
+                          setResetToken('');
+                          setNewPassword('');
+                          setConfirmPassword('');
+                          setError('');
+                          setSuccessMessage('');
+                        }}
+                      >
+                        Back to Email
+                      </button>
+                    )}
+                  </div>
+                </form>
+              </div>
             </div>
-            <h1 className="app-title">MonuVista</h1>
-            <p className="app-subtitle">
-              {step === 'email' 
-                ? 'Enter your email to reset your password'
-                : 'Enter the reset token and new password'
-              }
-            </p>
           </div>
-
-          <IonCard className="login-card">
-            <IonCardContent>
-              {step === 'email' ? (
-                <form onSubmit={handleRequestReset}>
-                  <IonItem lines="none" className="input-item">
-                    <IonIcon icon={mailOutline} slot="start" className="input-icon" />
-                    <IonLabel position="floating">Email Address</IonLabel>
-                    <IonInput
-                      type="email"
-                      value={email}
-                      onIonChange={(e) => setEmail(e.detail.value!)}
-                      required
-                      className="custom-input"
-                    />
-                  </IonItem>
-
-                  {error && (
-                    <IonText color="danger" className="error-text">
-                      <p>{error}</p>
-                    </IonText>
-                  )}
-
-                  {successMessage && (
-                    <IonText color="success" className="error-text">
-                      <p>{successMessage}</p>
-                    </IonText>
-                  )}
-
-                  <IonButton 
-                    expand="block" 
-                    type="submit" 
-                    disabled={loading} 
-                    className="login-button"
-                  >
-                    {loading ? 'Sending...' : 'Send Reset Link'}
-                  </IonButton>
-                </form>
-              ) : (
-                <form onSubmit={handleResetPassword}>
-                  <IonItem lines="none" className="input-item">
-                    <IonLabel position="floating">Reset Token</IonLabel>
-                    <IonInput
-                      type="text"
-                      value={resetToken}
-                      onIonChange={(e) => setResetToken(e.detail.value!)}
-                      required
-                      className="custom-input"
-                      placeholder="Paste token from email"
-                    />
-                  </IonItem>
-
-                  <IonItem lines="none" className="input-item">
-                    <IonIcon icon={lockClosedOutline} slot="start" className="input-icon" />
-                    <IonLabel position="floating">New Password</IonLabel>
-                    <IonInput
-                      type="password"
-                      value={newPassword}
-                      onIonChange={(e) => setNewPassword(e.detail.value!)}
-                      required
-                      className="custom-input"
-                    />
-                  </IonItem>
-
-                  <IonItem lines="none" className="input-item">
-                    <IonIcon icon={lockClosedOutline} slot="start" className="input-icon" />
-                    <IonLabel position="floating">Confirm Password</IonLabel>
-                    <IonInput
-                      type="password"
-                      value={confirmPassword}
-                      onIonChange={(e) => setConfirmPassword(e.detail.value!)}
-                      required
-                      className="custom-input"
-                    />
-                  </IonItem>
-
-                  {error && (
-                    <IonText color="danger" className="error-text">
-                      <p>{error}</p>
-                    </IonText>
-                  )}
-
-                  {successMessage && (
-                    <IonText color="success" className="error-text">
-                      <p>{successMessage}</p>
-                    </IonText>
-                  )}
-
-                  <IonButton 
-                    expand="block" 
-                    type="submit" 
-                    disabled={loading} 
-                    className="login-button"
-                  >
-                    {loading ? 'Resetting...' : 'Reset Password'}
-                  </IonButton>
-
-                  <IonButton 
-                    expand="block" 
-                    fill="outline"
-                    onClick={() => {
-                      setStep('email');
-                      setResetToken('');
-                      setNewPassword('');
-                      setConfirmPassword('');
-                      setError('');
-                      setSuccessMessage('');
-                    }}
-                    className="register-button"
-                  >
-                    Back to Email
-                  </IonButton>
-                </form>
-              )}
-            </IonCardContent>
-          </IonCard>
         </div>
-        
         <IonLoading isOpen={loading} />
       </IonContent>
     </IonPage>

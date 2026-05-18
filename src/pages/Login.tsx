@@ -1,17 +1,5 @@
 import { useState } from 'react';
-import {
-  IonContent,
-  IonPage,
-  IonItem,
-  IonLabel,
-  IonInput,
-  IonButton,
-  IonText,
-  IonLoading,
-  IonCard,
-  IonCardContent,
-  IonIcon
-} from '@ionic/react';
+import { IonContent, IonPage, IonIcon, IonLoading } from '@ionic/react';
 import { mailOutline, lockClosedOutline, eyeOutline, eyeOffOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
 import authService from '../services/authService';
@@ -32,7 +20,6 @@ const Login: React.FC = () => {
 
     try {
       const response = await authService.login({ email, password });
-      
       if (response.success) {
         history.push('/home');
       } else {
@@ -47,93 +34,94 @@ const Login: React.FC = () => {
 
   return (
     <IonPage>
-      <IonContent className="login-content">
+      <IonContent className="auth-page">
         <div className="container py-5">
-          <div className="login-container mx-auto">
-            <div className="login-header text-center">
-              <div className="logo-circle mx-auto">
-                <IonIcon icon={lockClosedOutline} className="logo-icon" />
+          <div className="row justify-content-center">
+            <div className="col-xl-5 col-lg-6 col-md-8">
+              <div className="auth-card">
+                <div className="auth-header">
+                  <div className="brand-badge">
+                    <IonIcon icon={lockClosedOutline} />
+                  </div>
+                  <h1 className="auth-title">MonuVista</h1>
+                  <p className="auth-subtitle">Welcome back! Please login to continue</p>
+                </div>
+
+                <form onSubmit={handleLogin} className="mb-0">
+                  <div className="mb-4">
+                    <label className="form-label text-uppercase text-muted fw-bold small">Email</label>
+                    <div className="input-group input-group-lg shadow-sm rounded-3 overflow-hidden">
+                      <span className="input-group-text bg-white border-end-0">
+                        <IonIcon icon={mailOutline} />
+                      </span>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        className="form-control form-control-lg form-control-brand border-start-0"
+                        placeholder="you@example.com"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label text-uppercase text-muted fw-bold small">Password</label>
+                    <div className="input-group input-group-lg shadow-sm rounded-3 overflow-hidden">
+                      <span className="input-group-text bg-white border-end-0">
+                        <IonIcon icon={lockClosedOutline} />
+                      </span>
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        className="form-control form-control-lg form-control-brand border-start-0"
+                        placeholder="Enter your password"
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-link text-secondary px-3"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        <IonIcon icon={showPassword ? eyeOffOutline : eyeOutline} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {error && (
+                    <div className="alert alert-danger auth-alert" role="alert">
+                      {error}
+                    </div>
+                  )}
+
+                  <div className="d-flex justify-content-end mb-4">
+                    <button
+                      type="button"
+                      className="btn btn-link p-0 auth-link"
+                      onClick={() => history.push('/forgot-password')}
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
+
+                  <div className="d-grid gap-3">
+                    <button type="submit" className="btn btn-brand" disabled={loading}>
+                      {loading ? 'Logging in...' : 'Login'}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-outline-brand"
+                      onClick={() => history.push('/register')}
+                    >
+                      Create New Account
+                    </button>
+                  </div>
+                </form>
               </div>
-              <h1 className="app-title">MonuVista</h1>
-              <p className="app-subtitle">Welcome back! Please login to continue</p>
             </div>
-
-            <IonCard className="login-card form-card">
-              <IonCardContent>
-                <form onSubmit={handleLogin}>
-                <IonItem lines="none" className="input-item">
-                  <IonIcon icon={mailOutline} slot="start" className="input-icon" />
-                  <IonLabel position="floating">Email</IonLabel>
-                  <IonInput
-                    type="email"
-                    value={email}
-                    onIonChange={(e) => setEmail(e.detail.value!)}
-                    required
-                    className="custom-input"
-                  />
-                </IonItem>
-
-                <IonItem lines="none" className="input-item">
-                  <IonIcon icon={lockClosedOutline} slot="start" className="input-icon" />
-                  <IonLabel position="floating">Password</IonLabel>
-                  <IonInput
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onIonChange={(e) => setPassword(e.detail.value!)}
-                    required
-                    className="custom-input"
-                  />
-                  <IonIcon
-                    icon={showPassword ? eyeOffOutline : eyeOutline}
-                    slot="end"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="password-toggle"
-                  />
-                </IonItem>
-
-                {error && (
-                  <IonText color="danger" className="error-text">
-                    <p>{error}</p>
-                  </IonText>
-                )}
-
-                <div style={{ textAlign: 'right', marginBottom: '16px' }}>
-                  <IonButton 
-                    fill="clear" 
-                    size="small"
-                    onClick={() => history.push('/forgot-password')}
-                    style={{ margin: 0, padding: 0 }}
-                  >
-                    Forgot Password?
-                  </IonButton>
-                </div>
-
-                <IonButton 
-                  expand="block" 
-                  type="submit" 
-                  disabled={loading} 
-                  className="login-button"
-                >
-                  {loading ? 'Logging in...' : 'Login'}
-                </IonButton>
-
-                <div className="divider">
-                  <span>or</span>
-                </div>
-
-                <IonButton 
-                  expand="block" 
-                  fill="outline" 
-                  onClick={() => history.push('/register')}
-                  className="register-button"
-                >
-                  Create New Account
-                </IonButton>
-              </form>
-            </IonCardContent>
-          </IonCard>
+          </div>
         </div>
-        
         <IonLoading isOpen={loading} message="Logging in..." />
       </IonContent>
     </IonPage>
