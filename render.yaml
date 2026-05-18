@@ -15,4 +15,4 @@ services:
     branch: main
     root: frontend
     buildCommand: npm install && npm run build
-    startCommand: npm run start
+    startCommand: npm start
