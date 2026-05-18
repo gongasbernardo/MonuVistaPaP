@@ -313,7 +313,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  background-color: #ff6b6b;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: white;
   padding: 0.4rem 0.8rem;
   border-radius: 4px;

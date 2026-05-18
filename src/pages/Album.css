@@ -39,29 +39,29 @@
 }
 
 .stat-card.visited {
-  border-color: #10B981;
-  background: linear-gradient(135deg, #D1FAE5 0%, #ECFDF5 100%);
+  border-color: rgba(233, 128, 95, 0.14);
+  background: linear-gradient(135deg, rgba(232,128,95,0.06) 0%, rgba(232,128,95,0.03) 100%);
 }
 
 .stat-card.tovisit {
-  border-color: #F59E0B;
-  background: linear-gradient(135deg, #FEF3C7 0%, #FFFBEB 100%);
+  border-color: rgba(232,128,95,0.14);
+  background: linear-gradient(135deg, rgba(232,128,95,0.06) 0%, rgba(232,128,95,0.03) 100%);
 }
 
 .stat-card .stat-number {
   display: block;
   font-size: 24px;
   font-weight: 800;
-  color: #E8805F;
+  color: var(--primary);
   margin-bottom: 4px;
 }
 
 .stat-card.visited .stat-number {
-  color: #10B981;
+  color: var(--primary);
 }
 
 .stat-card.tovisit .stat-number {
-  color: #F59E0B;
+  color: var(--primary);
 }
 
 .stat-card .stat-label {
@@ -231,12 +231,12 @@
 }
 
 .status-badge.visited {
-  background: rgba(16, 185, 129, 0.95);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: white;
 }
 
 .status-badge.tovisit {
-  background: rgba(245, 158, 11, 0.95);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: white;
 }
 
@@ -339,27 +339,27 @@
   align-items: center;
   gap: 12px;
   padding: 16px;
-  background: linear-gradient(135deg, #D1FAE5 0%, #ECFDF5 100%);
-  border: 2px solid #10B981;
+  background: linear-gradient(135deg, rgba(232,128,95,0.06) 0%, rgba(232,128,95,0.02) 100%);
+  border: 2px solid rgba(232,128,95,0.14);
   border-radius: 12px;
   margin-bottom: 20px;
 }
 
 .visit-info-card ion-icon {
   font-size: 32px;
-  color: #10B981;
+  color: var(--primary);
 }
 
 .visit-info-card strong {
   display: block;
   font-size: 14px;
-  color: #065F46;
+  color: var(--primary-dark);
   margin-bottom: 4px;
 }
 
 .visit-info-card p {
   font-size: 13px;
-  color: #059669;
+  color: var(--primary-dark);
   margin: 0;
   font-weight: 600;
 }

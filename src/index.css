@@ -2,6 +2,20 @@
   --primary: #E8805F;
   --primary-dark: #D95F3D;
   --primary-light: #F5A882;
+  /* Map Ionic color tokens to the app brand so Ionic components use the orange tone */
+  --ion-color-primary: #E8805F;
+  --ion-color-primary-rgb: 232, 128, 95;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-shade: #D95F3D;
+  --ion-color-primary-tint: #F5A882;
+
+  /* Keep other semantic tokens aligned to brand to avoid mixed palettes */
+  --ion-color-success: #E8805F;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-warning: #E8805F;
+  --ion-color-warning-contrast: #ffffff;
+  --ion-color-danger: #E8805F;
+  --ion-color-danger-contrast: #ffffff;
   --primary-accent: #FF6B4A;
 
   --neutral-0: #FFFFFF;
