@@ -79,7 +79,6 @@
 
 .folder-tabs {
   margin-bottom: 16px;
-  overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -398,10 +397,6 @@
   text-transform: uppercase;
 }
 
-/* ========================================
-   RESPONSIVE
-   ======================================== */
-
 @media (max-width: 768px) {
   .album-stats {
     grid-template-columns: repeat(2, 1fr);
@@ -568,10 +563,6 @@
   font-weight: 500;
 }
 
-/* ========================================
-   RESPONSIVE DESIGN
-   ======================================== */
-
 @media (max-width: 768px) {
   .album-content {
     padding: 16px;
@@ -598,10 +589,6 @@
     font-size: 11px;
   }
 }
-
-/* ========================================
-   CUSTOM ALERT OVERLAY (replaces IonAlert)
-   ======================================== */
 
 .custom-alert-overlay {
   position: fixed;
