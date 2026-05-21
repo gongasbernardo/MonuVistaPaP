@@ -306,14 +306,14 @@ const Groups: React.FC = () => {
   const handleKickMember = async () => {
     if (!selectedGroup || !memberToKick) return;
     if (!kickReason.trim()) {
-      alert("Por favor, indique o motivo da expulsÃ£o");
+      alert("Por favor, indique o motivo da expulsão");
       return;
     }
 
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("Erro: Token nÃ£o encontrado. FaÃ§a login novamente.");
+        alert("Erro: Token não encontrado. Faça login novamente.");
         return;
       }
 
@@ -357,7 +357,7 @@ const Groups: React.FC = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("Erro: Token nÃ£o encontrado. FaÃ§a login novamente.");
+        alert("Erro: Token não encontrado. Faça login novamente.");
         return;
       }
 
@@ -519,7 +519,7 @@ const Groups: React.FC = () => {
 
   const handleShareContent = async () => {
     if (!shareTitle.trim() || !selectedGroup) {
-      alert("Por favor, digite um tÃ­tulo");
+      alert("Por favor, digite um título");
       return;
     }
 
@@ -552,10 +552,10 @@ const Groups: React.FC = () => {
       setShareTitle("");
       setShareDescription("");
       setShareImage("");
-      alert("ConteÃºdo partilhado com sucesso!");
+      alert("Conteúdo partilhado com sucesso!");
     } catch (error) {
       console.error("Error sharing content:", error);
-      alert("Erro ao partilhar conteÃºdo");
+      alert("Erro ao partilhar conteúdo");
     }
   };
 
@@ -574,7 +574,7 @@ const Groups: React.FC = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("Erro: Token nÃ£o encontrado. FaÃ§a login novamente.");
+        alert("Erro: Token não encontrado. Faça login novamente.");
         return;
       }
 
@@ -729,7 +729,7 @@ const Groups: React.FC = () => {
             {userGroups.length === 0 ? (
               <div className="empty-state">
                 <IonIcon icon={people} size="large" />
-                <p>VocÃª nÃ£o tem grupos ainda</p>
+                <p>Você não tem grupos ainda</p>
                 <p className="subtitle">
                   Crie um novo grupo ou descubra grupos existentes
                 </p>
@@ -777,7 +777,7 @@ const Groups: React.FC = () => {
               .length === 0 ? (
               <div className="empty-state">
                 <IonIcon icon={people} size="large" />
-                <p>Nenhum grupo disponÃ­vel</p>
+                <p>Nenhum grupo disponível</p>
               </div>
             ) : (
               groups
@@ -878,9 +878,9 @@ const Groups: React.FC = () => {
                 />
               </IonItem>
               <IonItem>
-                <IonLabel position="stacked">DescriÃ§Ã£o</IonLabel>
+                <IonLabel position="stacked">Descrição</IonLabel>
                 <IonTextarea
-                  placeholder="Digite a descriÃ§Ã£o do grupo"
+                  placeholder="Digite a descrição do grupo"
                   value={newGroupDescription}
                   onIonChange={(e) => setNewGroupDescription(e.detail.value || "")}
                 />
@@ -888,7 +888,7 @@ const Groups: React.FC = () => {
               <IonItem>
                 <IonLabel position="stacked">Tags</IonLabel>
                 <IonInput
-                  placeholder="Digite tags separadas por vÃ­rgula (ex: viagem, turismo)"
+                  placeholder="Digite tags separadas por vírgula (ex: viagem, turismo)"
                   value={newGroupTags}
                   onIonChange={(e) => setNewGroupTags(e.detail.value || "")}
                 />
@@ -907,7 +907,7 @@ const Groups: React.FC = () => {
                 {newGroupImage && (
                   <img
                     src={newGroupImage}
-                    alt="PrÃ©-visualizaÃ§Ã£o"
+                    alt="Pré-visualização"
                     className="image-preview"
                   />
                 )}
@@ -935,7 +935,7 @@ const Groups: React.FC = () => {
                   <IonLabel position="stacked">Palavra-passe *</IonLabel>
                   <IonInput
                     type="password"
-                    placeholder="Digite a palavra-passe (mÃ­n. 4 caracteres)"
+                    placeholder="Digite a palavra-passe (mín. 4 caracteres)"
                     value={newGroupPassword}
                     onIonChange={(e) => setNewGroupPassword(e.detail.value || "")}
                   />
@@ -1035,7 +1035,7 @@ const Groups: React.FC = () => {
                       <span className="stat-value">
                         {selectedGroup.sharedContent.length}
                       </span>
-                      <span className="stat-label">ConteÃºdo</span>
+                      <span className="stat-label">Conteúdo</span>
                     </div>
                   </div>
 
@@ -1131,10 +1131,10 @@ const Groups: React.FC = () => {
 
                 {/* Shared Content Section */}
                 <div className="section">
-                  <h3>ConteÃºdo Partilhado ({selectedGroup.sharedContent.length})</h3>
+                  <h3>Conteúdo Partilhado ({selectedGroup.sharedContent.length})</h3>
                   <div className="shared-content-list">
                     {selectedGroup.sharedContent.length === 0 ? (
-                      <p className="empty-text">Nenhum conteÃºdo partilhado</p>
+                      <p className="empty-text">Nenhum conteúdo partilhado</p>
                     ) : (
                       selectedGroup.sharedContent.map(
                         (content: any, idx: number) => (
@@ -1164,14 +1164,14 @@ const Groups: React.FC = () => {
                   </div>
 
                   <div className="share-form">
-                    <h4>Partilhar ConteÃºdo</h4>
+                    <h4>Partilhar Conteúdo</h4>
                     <IonInput
-                      placeholder="TÃ­tulo"
+                      placeholder="Título"
                       value={shareTitle}
                       onIonChange={(e) => setShareTitle(e.detail.value || "")}
                     />
                     <IonTextarea
-                      placeholder="DescriÃ§Ã£o"
+                      placeholder="Descrição"
                       value={shareDescription}
                       onIonChange={(e) =>
                         setShareDescription(e.detail.value || "")
@@ -1189,7 +1189,7 @@ const Groups: React.FC = () => {
                     {shareImage && (
                       <img
                         src={shareImage}
-                        alt="PrÃ©-visualizaÃ§Ã£o"
+                        alt="Pré-visualização"
                         className="image-preview"
                       />
                     )}
@@ -1245,7 +1245,7 @@ const Groups: React.FC = () => {
                 />
               </IonItem>
               <IonItem>
-                <IonLabel position="stacked">DescriÃ§Ã£o</IonLabel>
+                <IonLabel position="stacked">Descrição</IonLabel>
                 <IonTextarea
                   value={editGroupDescription}
                   onIonChange={(e) => setEditGroupDescription(e.detail.value || "")}
@@ -1254,7 +1254,7 @@ const Groups: React.FC = () => {
               <IonItem>
                 <IonLabel position="stacked">Tags</IonLabel>
                 <IonInput
-                  placeholder="Digite tags separadas por vÃ­rgula"
+                  placeholder="Digite tags separadas por vírgula"
                   value={editGroupTags}
                   onIonChange={(e) => setEditGroupTags(e.detail.value || "")}
                 />
@@ -1273,7 +1273,7 @@ const Groups: React.FC = () => {
                 {editGroupImage && (
                   <img
                     src={editGroupImage}
-                    alt="PrÃ©-visualizaÃ§Ã£o"
+                    alt="Pré-visualização"
                     className="image-preview"
                   />
                 )}
@@ -1319,7 +1319,7 @@ const Groups: React.FC = () => {
                 className="ion-margin-top"
                 onClick={handleUpdateGroup}
               >
-                Guardar alteraÃ§Ãµes
+                Guardar alterações
               </IonButton>
               <IonButton
                 expand="block"
@@ -1411,7 +1411,7 @@ const Groups: React.FC = () => {
                   </p>
                   <p>{memberToKick.email || ""}</p>
                   <p style={{ marginTop: "1rem", marginBottom: "0.5rem" }}>
-                    <strong>Indique o motivo da expulsÃ£o:</strong>
+                    <strong>Indique o motivo da expulsão:</strong>
                   </p>
                 </div>
                 <IonItem>
