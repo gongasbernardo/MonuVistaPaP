@@ -25,7 +25,6 @@ const UserSearch = () => {
   const [results, setResults] = useState<PublicUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [friendLoading, setFriendLoading] = useState<string | null>(null);
   const history = useHistory();
 
   useEffect(() => {
@@ -53,24 +52,6 @@ const UserSearch = () => {
       setResults([]);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleAddFriend = async (userId: string) => {
-    setFriendLoading(userId);
-    setError('');
-
-    try {
-      await userService.addFriend(userId);
-      setResults((prev) =>
-        prev.map((user) =>
-          user.id === userId ? { ...user, isFriend: true } : user
-        )
-      );
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Erro ao adicionar amigo');
-    } finally {
-      setFriendLoading(null);
     }
   };
 
@@ -139,20 +120,7 @@ const UserSearch = () => {
                 <h2>{user.name}</h2>
                 <p>{user.email || 'Email privado'}</p>
               </IonLabel>
-              {user.isFriend ? (
-                <IonButton fill="outline" size="small" disabled>
-                  Amigo
-                </IonButton>
-              ) : (
-                <IonButton
-                  fill="solid"
-                  size="small"
-                  onClick={() => handleAddFriend(user.id)}
-                  disabled={friendLoading === user.id}
-                >
-                  {friendLoading === user.id ? 'A adicionar...' : 'Adicionar'}
-                </IonButton>
-              )}
+              <IonIcon icon={chevronForwardOutline} slot="end" />
             </IonItem>
           ))}
         </IonList>

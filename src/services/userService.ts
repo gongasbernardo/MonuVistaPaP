@@ -7,7 +7,6 @@ export interface PublicUser {
   name: string;
   avatar?: string;
   email?: string;
-  isFriend?: boolean;
 }
 
 class UserService {
@@ -26,24 +25,6 @@ class UserService {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     });
     return response.data?.user || null;
-  }
-
-  async getFriends(): Promise<PublicUser[]> {
-    const token = authService.getToken();
-    const response = await axios.get(`${API_URL}/api/friends`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-    });
-    return response.data?.data || [];
-  }
-
-  async addFriend(userId: string): Promise<PublicUser> {
-    const token = authService.getToken();
-    const response = await axios.post(
-      `${API_URL}/api/friends`,
-      { userId },
-      { headers: token ? { Authorization: `Bearer ${token}` } : undefined }
-    );
-    return response.data?.data;
   }
 }
 

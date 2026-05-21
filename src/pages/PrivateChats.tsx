@@ -13,14 +13,12 @@ import {
   IonButton,
   IonTextarea,
   IonInput,
-  IonSearchbar,
   IonIcon,
   IonSpinner,
   IonText,
 } from '@ionic/react';
 import { chatbubbleOutline, sendOutline, addOutline, personOutline } from 'ionicons/icons';
 import chatService, { ChatConversation, ChatMessage } from '../services/chatService';
-import userService, { PublicUser } from '../services/userService';
 import authService from '../services/authService';
 import './PrivateChats.css';
 
@@ -35,18 +33,11 @@ const PrivateChats = () => {
   const [newChatEmail, setNewChatEmail] = useState('');
   const [creatingChat, setCreatingChat] = useState(false);
   const [createError, setCreateError] = useState('');
-  const [friends, setFriends] = useState<PublicUser[]>([]);
-  const [friendSearch, setFriendSearch] = useState('');
-  const [searchResults, setSearchResults] = useState<PublicUser[]>([]);
-  const [friendsLoading, setFriendsLoading] = useState(false);
-  const [friendError, setFriendError] = useState('');
-  const [friendActionLoading, setFriendActionLoading] = useState<string | null>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
   const currentUser = authService.getUser();
 
   useEffect(() => {
     loadConversations();
-    loadFriends();
   }, []);
 
   useEffect(() => {
@@ -54,15 +45,6 @@ const PrivateChats = () => {
       loadMessages(selectedChat._id);
     }
   }, [selectedChat]);
-
-  useEffect(() => {
-    if (friendSearch.trim().length >= 2) {
-      loadSearchResults(friendSearch.trim());
-    } else {
-      setSearchResults([]);
-      setFriendError('');
-    }
-  }, [friendSearch]);
 
   const loadConversations = async () => {
     setLoading(true);
@@ -101,31 +83,6 @@ const PrivateChats = () => {
     }
   };
 
-  const loadFriends = async () => {
-    setFriendsLoading(true);
-    setFriendError('');
-
-    try {
-      const data = await userService.getFriends();
-      setFriends(data);
-    } catch (err: any) {
-      setFriendError(err?.response?.data?.message || 'Erro ao carregar amigos');
-    } finally {
-      setFriendsLoading(false);
-    }
-  };
-
-  const loadSearchResults = async (query: string) => {
-    setFriendError('');
-
-    try {
-      const data = await userService.searchUsers(query);
-      setSearchResults(data);
-    } catch (err: any) {
-      setFriendError(err?.response?.data?.message || 'Erro ao pesquisar utilizadores');
-      setSearchResults([]);
-    }
-  };
 
   const handleSelectChat = (chat: ChatConversation) => {
     setSelectedChat(chat);
@@ -173,43 +130,6 @@ const PrivateChats = () => {
     }
   };
 
-  const handleAddFriend = async (userId: string) => {
-    setFriendActionLoading(userId);
-    setFriendError('');
-
-    try {
-      const friend = await userService.addFriend(userId);
-      setFriends((prev) => [...prev, friend]);
-      setSearchResults((prev) =>
-        prev.map((item) =>
-          item.id === userId ? { ...item, isFriend: true } : item
-        )
-      );
-    } catch (err: any) {
-      setFriendError(err?.response?.data?.message || 'Erro ao adicionar amigo');
-    } finally {
-      setFriendActionLoading(null);
-    }
-  };
-
-  const openChatWithFriend = async (friend: PublicUser) => {
-    const existing = conversations.find((chat) =>
-      chat.participantIds?.includes(friend.id) || chat.participants.includes(friend.name)
-    );
-
-    if (existing) {
-      setSelectedChat(existing);
-      return;
-    }
-
-    try {
-      const chat = await chatService.createChatWithUserId(friend.id);
-      setConversations((prev) => [chat, ...prev]);
-      setSelectedChat(chat);
-    } catch (err: any) {
-      setFriendError(err?.response?.data?.message || 'Erro ao iniciar conversa');
-    }
-  };
 
   const formatUpdatedAt = (value: string) => {
     const date = new Date(value);
@@ -239,120 +159,6 @@ const PrivateChats = () => {
               </div>
               <IonIcon icon={chatbubbleOutline} className="chat-sidebar-icon" />
             </div>
-
-            <IonSearchbar
-              value={friendSearch}
-              onIonInput={(e) => setFriendSearch(e.detail.value || '')}
-              placeholder="Pesquisar amigos pelo nome"
-              debounce={250}
-            />
-
-            {friendError && <IonText color="danger">{friendError}</IonText>}
-
-            {friendSearch.trim().length >= 2 ? (
-              <>
-                <div className="chat-section-title">Resultados</div>
-                {loading || friendsLoading ? (
-                  <div className="chat-loading">
-                    <IonSpinner name="crescent" />
-                    <span>Pesquisando utilizadores...</span>
-                  </div>
-                ) : (
-                  <IonList>
-                    {searchResults.map((friend) => (
-                      <IonItem
-                        key={friend.id}
-                        button
-                        detail={false}
-                        className={selectedChat?.participantIds?.includes(friend.id) ? 'active-chat-item' : ''}
-                        onClick={() => openChatWithFriend(friend)}
-                      >
-                        <IonAvatar slot="start">
-                          {friend.avatar ? (
-                            friend.avatar.startsWith('data:') ? (
-                              <img src={friend.avatar} alt={friend.name} />
-                            ) : (
-                              <span>{friend.avatar}</span>
-                            )
-                          ) : (
-                            <span>{friend.name.charAt(0).toUpperCase()}</span>
-                          )}
-                        </IonAvatar>
-                        <IonLabel>
-                          <h3>{friend.name}</h3>
-                          <p>{friend.email || 'Email privado'}</p>
-                        </IonLabel>
-                        <IonButton
-                          fill={friend.isFriend ? 'outline' : 'solid'}
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (friend.isFriend) {
-                              openChatWithFriend(friend);
-                            } else {
-                              handleAddFriend(friend.id);
-                            }
-                          }}
-                          disabled={friendActionLoading === friend.id}
-                        >
-                          {friendActionLoading === friend.id
-                            ? 'A processar...'
-                            : friend.isFriend
-                            ? 'Chat'
-                            : 'Adicionar'}
-                        </IonButton>
-                      </IonItem>
-                    ))}
-                    {searchResults.length === 0 && (
-                      <div className="chat-empty">
-                        <IonText>Nenhum utilizador encontrado com esse nome.</IonText>
-                      </div>
-                    )}
-                  </IonList>
-                )}
-              </>
-            ) : (
-              <>
-                <div className="chat-section-title">Amigos</div>
-                {friendsLoading ? (
-                  <div className="chat-loading">
-                    <IonSpinner name="crescent" />
-                    <span>Carregando amigos...</span>
-                  </div>
-                ) : friends.length === 0 ? (
-                  <div className="chat-empty">
-                    <IonText>Nenhum amigo encontrado. Procure pelo nome para adicionar amigos.</IonText>
-                  </div>
-                ) : (
-                  <IonList>
-                    {friends.map((friend) => (
-                      <IonItem
-                        key={friend.id}
-                        button
-                        detail={false}
-                        onClick={() => openChatWithFriend(friend)}
-                      >
-                        <IonAvatar slot="start">
-                          {friend.avatar ? (
-                            friend.avatar.startsWith('data:') ? (
-                              <img src={friend.avatar} alt={friend.name} />
-                            ) : (
-                              <span>{friend.avatar}</span>
-                            )
-                          ) : (
-                            <span>{friend.name.charAt(0).toUpperCase()}</span>
-                          )}
-                        </IonAvatar>
-                        <IonLabel>
-                          <h3>{friend.name}</h3>
-                          <p>{friend.email || 'Email privado'}</p>
-                        </IonLabel>
-                      </IonItem>
-                    ))}
-                  </IonList>
-                )}
-              </>
-            )}
 
             <div className="chat-section-title">Conversas recentes</div>
             {loading && (

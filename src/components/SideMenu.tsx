@@ -7,7 +7,6 @@ import {
   chatbubbleOutline,
   sparklesOutline,
   personOutline,
-  searchOutline,
   closeOutline,
 } from "ionicons/icons";
 import "./SideMenu.css";
@@ -16,8 +15,6 @@ const NAV_LINKS = [
   { path: "/home", label: "Início", icon: homeOutline },
   { path: "/album", label: "Álbum", icon: albumsOutline },
   { path: "/community", label: "Comunidade", icon: peopleOutline },
-  { path: "/users", label: "Utilizadores", icon: searchOutline },
-  { path: "/chats", label: "Chats", icon: chatbubbleOutline },
   { path: "/groups", label: "Grupos", icon: chatbubbleOutline },
   { path: "/visit", label: "Visitar", icon: sparklesOutline },
   { path: "/profile", label: "Perfil", icon: personOutline },

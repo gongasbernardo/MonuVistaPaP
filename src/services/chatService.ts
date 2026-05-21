@@ -60,18 +60,6 @@ class ChatService {
     );
     return response.data?.data;
   }
-
-  async createChatWithUserId(userId: string): Promise<ChatConversation> {
-    const token = authService.getToken();
-    const response = await axios.post(
-      `${API_URL}/api/chats`,
-      { participantId: userId },
-      {
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-      }
-    );
-    return response.data?.data;
-  }
 }
 
 export default new ChatService();
