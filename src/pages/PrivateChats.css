@@ -47,6 +47,18 @@
   color: #2d9cdb;
 }
 
+.chat-section-title {
+  margin: 18px 0 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #374151;
+  letter-spacing: 0.02em;
+}
+
+ion-searchbar {
+  margin-bottom: 12px;
+}
+
 .chat-create-row {
   display: grid;
   grid-template-columns: 1fr auto;
