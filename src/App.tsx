@@ -11,6 +11,8 @@ import Community from './pages/Community';
 import VisitPlace from './pages/VisitPlace';
 import Groups from './pages/Groups';
 import Profile from './pages/Profile';
+import UserSearch from './pages/UserSearch';
+import PrivateChats from './pages/PrivateChats';
 import AppNavbar from './components/AppNavbar';
 import authService from './services/authService';
 
@@ -74,6 +76,12 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
         <ProtectedRoute exact path="/community">
           <Community />
+        </ProtectedRoute>
+        <ProtectedRoute exact path="/users">
+          <UserSearch />
+        </ProtectedRoute>
+        <ProtectedRoute exact path="/chats">
+          <PrivateChats />
         </ProtectedRoute>
         <ProtectedRoute exact path="/groups">
           <Groups />
