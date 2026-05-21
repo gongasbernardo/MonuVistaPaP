@@ -89,9 +89,9 @@ ion-segment {
 }
 
 ion-segment ion-segment-button {
-  --color: #6B7280;
+  --color: var(--neutral-500);
   --color-checked: white;
-  --background-checked: linear-gradient(135deg, #E8805F 0%, #D95F3D 100%);
+  --background-checked: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   --indicator-color: transparent;
   border-radius: 8px;
   margin: 0 4px;
