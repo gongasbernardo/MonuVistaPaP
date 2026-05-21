@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useParams, useLocation } from "react-router-dom";
 import {
   IonPage,
   IonContent,
@@ -88,15 +89,46 @@ const Profile = () => {
 
   const settingsModalRef = useRef<HTMLIonModalElement>(null);
   const history = useHistory();
+  const params = useParams<{ id?: string }>();
+  const location = useLocation();
+  const [isOwnProfile, setIsOwnProfile] = useState(true);
 
   useEffect(() => {
-    const userData = authService.getUser();
-    setUser(userData);
-    setNewName(userData?.name || "");
-    setNewEmail(userData?.email || "");
-    setSelectedAvatar(userData?.avatar || "");
-    setCustomPhoto(userData?.avatar?.startsWith("data:") ? userData.avatar : null);
-    loadUserStats();
+    const load = async () => {
+      const currentUser = authService.getUser();
+      const routeId = params.id || new URLSearchParams(location.search).get("id");
+      // If routeId exists and is different from current user, fetch that user's public profile
+      if (routeId && currentUser && routeId !== (currentUser.id || currentUser._id)) {
+        try {
+          const token = authService.getToken();
+          const resp = await axios.get(`${API_URL}/api/users/${routeId}`, {
+            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+          });
+          if (resp.data && resp.data.user) {
+            setUser(resp.data.user);
+            setIsOwnProfile(false);
+          } else {
+            // fallback to current user
+            setUser(currentUser);
+            setIsOwnProfile(true);
+          }
+        } catch (err) {
+          console.error("Erro ao carregar perfil do utilizador:", err);
+          setUser(currentUser);
+          setIsOwnProfile(true);
+        }
+      } else {
+        setUser(currentUser);
+        setIsOwnProfile(true);
+      }
+
+      setNewName((currentUser && currentUser.name) || "");
+      setNewEmail((currentUser && currentUser.email) || "");
+      setSelectedAvatar((currentUser && currentUser.avatar) || "");
+      setCustomPhoto(currentUser && currentUser.avatar && currentUser.avatar.startsWith && currentUser.avatar.startsWith("data:") ? currentUser.avatar : null);
+      await loadUserStats();
+    };
+    load();
   }, []);
 
   const loadUserStats = async () => {
@@ -268,7 +300,7 @@ const Profile = () => {
             <h1 className="profile-name">{user?.name || "Utilizador"}</h1>
             <div className="profile-email">
               <IonIcon icon={mailOutline} />
-              <span>{user?.email || ""}</span>
+              <span>{isOwnProfile ? (user?.email || "") : "Email oculto por privacidade"}</span>
             </div>
             <div className="profile-level-badge">
               <IonIcon icon={ribbonOutline} />
@@ -288,13 +320,15 @@ const Profile = () => {
             <IonIcon icon={trendingUpOutline} />
             <span>Estatísticas</span>
           </div>
-          <div
-            className={`profile-tab ${activeTab === "settings" ? "active" : ""}`}
-            onClick={() => setActiveTab("settings")}
-          >
-            <IonIcon icon={settingsOutline} />
-            <span>Definições</span>
-          </div>
+          {isOwnProfile && (
+            <div
+              className={`profile-tab ${activeTab === "settings" ? "active" : ""}`}
+              onClick={() => setActiveTab("settings")}
+            >
+              <IonIcon icon={settingsOutline} />
+              <span>Definições</span>
+            </div>
+          )}
           <div
             className={`profile-tab ${activeTab === "privacy" ? "active" : ""}`}
             onClick={() => setActiveTab("privacy")}
@@ -525,10 +559,12 @@ const Profile = () => {
           )}
 
           {/* Logout */}
-          <div className="logout-btn" onClick={handleLogout}>
-            <IonIcon icon={logOutOutline} />
-            <span>Terminar Sessão</span>
-          </div>
+          {isOwnProfile && (
+            <div className="logout-btn" onClick={handleLogout}>
+              <IonIcon icon={logOutOutline} />
+              <span>Terminar Sessão</span>
+            </div>
+          )}
         </div>
       </IonContent>
 

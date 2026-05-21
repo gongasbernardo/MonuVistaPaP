@@ -84,6 +84,9 @@ const AppRoutes: React.FC = () => {
         <ProtectedRoute exact path="/profile">
           <Profile />
         </ProtectedRoute>
+        <ProtectedRoute exact path="/profile/:id">
+          <Profile />
+        </ProtectedRoute>
         <Route exact path="/">
           <Redirect to="/login" />
         </Route>
