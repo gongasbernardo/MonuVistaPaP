@@ -324,3 +324,30 @@
 .private-badge ion-icon {
   font-size: 0.9rem;
 }
+
+/* Ensure IonSegment buttons in the groups page show consistent selected state */
+.groups-segment {
+  --indicator-color: var(--ion-color-primary);
+}
+
+.groups-segment ion-segment-button {
+  --color: var(--neutral-600);
+  --color-checked: var(--ion-color-primary);
+  --background: transparent;
+  border-radius: 12px;
+  padding: 6px 14px;
+  margin: 0 6px;
+  transition: background 0.18s ease, color 0.18s ease, transform 0.12s ease;
+}
+
+.groups-segment ion-segment-button[aria-pressed="true"] {
+  background: rgba(232, 128, 95, 0.10);
+  color: var(--ion-color-primary);
+  font-weight: 700;
+  transform: translateY(-1px);
+}
+
+.groups-segment ion-segment-button[aria-pressed="true"] ion-badge {
+  --background: var(--ion-color-primary);
+  color: #fff;
+}

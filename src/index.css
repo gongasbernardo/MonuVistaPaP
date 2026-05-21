@@ -433,6 +433,16 @@ ion-tab-bar {
   backdrop-filter: blur(18px);
 }
 
+/* Global segment/button color tuning to avoid inconsistent states across the app */
+ion-segment {
+  --indicator-color: var(--ion-color-primary);
+}
+
+ion-segment-button {
+  --color: var(--neutral-600);
+  --color-checked: var(--ion-color-primary);
+}
+
 ::selection {
   background: rgba(232, 128, 95, 0.18);
 }
