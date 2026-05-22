@@ -11,36 +11,107 @@ const Register: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [language, setLanguage] = useState<'pt' | 'en' | 'es'>('pt');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const translations = {
+    pt: {
+      title: 'Criar Conta',
+      subtitle: 'Junte-se ao MonuVista hoje',
+      fullNameLabel: 'Nome completo',
+      fullNamePlaceholder: 'Seu nome completo',
+      emailLabel: 'Email',
+      emailPlaceholder: 'voce@exemplo.com',
+      passwordLabel: 'Senha',
+      passwordPlaceholder: 'Crie uma senha',
+      confirmPasswordLabel: 'Confirmar senha',
+      confirmPasswordPlaceholder: 'Repita sua senha',
+      languageLabel: 'Idioma',
+      registerButton: 'Registar',
+      creatingAccount: 'Criando conta...',
+      alreadyHaveAccount: 'Já tem uma conta?',
+      loginLink: 'Entrar',
+      errorPasswordMismatch: 'As senhas não correspondem',
+      errorPasswordLength: 'A senha deve ter pelo menos 6 caracteres',
+      errorSubmit: 'Ocorreu um erro ao registar',
+    },
+    en: {
+      title: 'Create Account',
+      subtitle: 'Join MonuVista today',
+      fullNameLabel: 'Full Name',
+      fullNamePlaceholder: 'Your full name',
+      emailLabel: 'Email',
+      emailPlaceholder: 'you@example.com',
+      passwordLabel: 'Password',
+      passwordPlaceholder: 'Create a password',
+      confirmPasswordLabel: 'Confirm Password',
+      confirmPasswordPlaceholder: 'Repeat your password',
+      languageLabel: 'Language',
+      registerButton: 'Register',
+      creatingAccount: 'Creating account...',
+      alreadyHaveAccount: 'Already have an account?',
+      loginLink: 'Login',
+      errorPasswordMismatch: 'Passwords do not match',
+      errorPasswordLength: 'Password must be at least 6 characters',
+      errorSubmit: 'An error occurred while registering',
+    },
+    es: {
+      title: 'Crear Cuenta',
+      subtitle: 'Únete a MonuVista hoy',
+      fullNameLabel: 'Nombre completo',
+      fullNamePlaceholder: 'Tu nombre completo',
+      emailLabel: 'Correo',
+      emailPlaceholder: 'tu@ejemplo.com',
+      passwordLabel: 'Contraseña',
+      passwordPlaceholder: 'Crea una contraseña',
+      confirmPasswordLabel: 'Confirmar contraseña',
+      confirmPasswordPlaceholder: 'Repite tu contraseña',
+      languageLabel: 'Idioma',
+      registerButton: 'Registrar',
+      creatingAccount: 'Creando cuenta...',
+      alreadyHaveAccount: '¿Ya tienes una cuenta?',
+      loginLink: 'Iniciar sesión',
+      errorPasswordMismatch: 'Las contraseñas no coinciden',
+      errorPasswordLength: 'La contraseña debe tener al menos 6 caracteres',
+      errorSubmit: 'Ocurrió un error al registrar',
+    },
+  };
+
+  const t = translations[language];
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t.errorPasswordMismatch);
       return;
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError(t.errorPasswordLength);
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await authService.register({ name, email, password });
-      if (response.success) {
-        history.push('/home');
+      const response = await authService.register({ name, email, password, language });
+      if (response.success || response.token || response.user) {
+        authService.setLanguage(language);
+        if (response.token) {
+          history.push('/home');
+        } else {
+          history.push('/login');
+        }
       } else {
-        setError(response.message || 'Registration failed');
+        setError(response.message || t.errorSubmit);
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'An error occurred');
+      setError(err.response?.data?.message || t.errorSubmit);
     } finally {
       setLoading(false);
     }
@@ -57,13 +128,13 @@ const Register: React.FC = () => {
                   <div className="brand-badge">
                     <IonIcon icon={personOutline} />
                   </div>
-                  <h1 className="auth-title">Create Account</h1>
-                  <p className="auth-subtitle">Join MonuVista today</p>
+                  <h1 className="auth-title">{t.title}</h1>
+                  <p className="auth-subtitle">{t.subtitle}</p>
                 </div>
 
                 <form onSubmit={handleRegister}>
                   <div className="mb-4">
-                    <label className="form-label text-uppercase text-muted fw-bold small">Full Name</label>
+                    <label className="form-label text-uppercase text-muted fw-bold small">{t.fullNameLabel}</label>
                     <div className="input-group input-group-lg shadow-sm rounded-3 overflow-hidden">
                       <span className="input-group-text bg-white border-end-0">
                         <IonIcon icon={personOutline} />
@@ -74,13 +145,13 @@ const Register: React.FC = () => {
                         onChange={(e) => setName(e.target.value)}
                         required
                         className="form-control form-control-lg form-control-brand border-start-0"
-                        placeholder="Your full name"
+                        placeholder={t.fullNamePlaceholder}
                       />
                     </div>
                   </div>
 
                   <div className="mb-4">
-                    <label className="form-label text-uppercase text-muted fw-bold small">Email</label>
+                    <label className="form-label text-uppercase text-muted fw-bold small">{t.emailLabel}</label>
                     <div className="input-group input-group-lg shadow-sm rounded-3 overflow-hidden">
                       <span className="input-group-text bg-white border-end-0">
                         <IonIcon icon={mailOutline} />
@@ -91,13 +162,28 @@ const Register: React.FC = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         required
                         className="form-control form-control-lg form-control-brand border-start-0"
-                        placeholder="you@example.com"
+                        placeholder={t.emailPlaceholder}
                       />
                     </div>
                   </div>
 
                   <div className="mb-4">
-                    <label className="form-label text-uppercase text-muted fw-bold small">Password</label>
+                    <label className="form-label text-uppercase text-muted fw-bold small">{t.languageLabel}</label>
+                    <div className="input-group input-group-lg shadow-sm rounded-3 overflow-hidden">
+                      <select
+                        value={language}
+                        onChange={(e) => setLanguage(e.target.value as 'pt' | 'en' | 'es')}
+                        className="form-control form-control-lg form-control-brand border-start-0"
+                      >
+                        <option value="pt">Português</option>
+                        <option value="en">English</option>
+                        <option value="es">Español</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="form-label text-uppercase text-muted fw-bold small">{t.passwordLabel}</label>
                     <div className="input-group input-group-lg shadow-sm rounded-3 overflow-hidden">
                       <span className="input-group-text bg-white border-end-0">
                         <IonIcon icon={lockClosedOutline} />
@@ -108,7 +194,7 @@ const Register: React.FC = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         required
                         className="form-control form-control-lg form-control-brand border-start-0"
-                        placeholder="Create a password"
+                        placeholder={t.passwordPlaceholder}
                       />
                       <button
                         type="button"
@@ -121,7 +207,7 @@ const Register: React.FC = () => {
                   </div>
 
                   <div className="mb-4">
-                    <label className="form-label text-uppercase text-muted fw-bold small">Confirm Password</label>
+                    <label className="form-label text-uppercase text-muted fw-bold small">{t.confirmPasswordLabel}</label>
                     <div className="input-group input-group-lg shadow-sm rounded-3 overflow-hidden">
                       <span className="input-group-text bg-white border-end-0">
                         <IonIcon icon={lockClosedOutline} />
@@ -132,7 +218,7 @@ const Register: React.FC = () => {
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
                         className="form-control form-control-lg form-control-brand border-start-0"
-                        placeholder="Repeat your password"
+                        placeholder={t.confirmPasswordPlaceholder}
                       />
                       <button
                         type="button"
@@ -152,18 +238,18 @@ const Register: React.FC = () => {
 
                   <div className="d-grid gap-3 mb-3">
                     <button type="submit" className="btn btn-brand" disabled={loading}>
-                      {loading ? 'Creating Account...' : 'Create Account'}
+                      {loading ? t.creatingAccount : t.registerButton}
                     </button>
                   </div>
 
                   <div className="text-center auth-footer">
-                    <span>Already have an account? </span>
+                    <span>{t.alreadyHaveAccount} </span>
                     <button
                       type="button"
                       className="btn btn-link p-0 auth-link"
                       onClick={() => history.push('/login')}
                     >
-                      Login
+                      {t.loginLink}
                     </button>
                   </div>
                 </form>
@@ -171,7 +257,7 @@ const Register: React.FC = () => {
             </div>
           </div>
         </div>
-        <IonLoading isOpen={loading} message="Creating account..." />
+        <IonLoading isOpen={loading} message={t.creatingAccount} />
       </IonContent>
     </IonPage>
   );

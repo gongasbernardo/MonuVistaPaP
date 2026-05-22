@@ -15,9 +15,10 @@ export interface RecognizedMonument {
 }
 
 class VisionService {
-  async recognizeMonument(imageBase64: string): Promise<RecognizedMonument> {
+  async recognizeMonument(imageBase64: string, language?: string): Promise<RecognizedMonument> {
     const response = await axios.post(`${API_URL}/api/vision/recognize`, {
       imageBase64,
+      language,
     });
 
     if (response.data.success) {

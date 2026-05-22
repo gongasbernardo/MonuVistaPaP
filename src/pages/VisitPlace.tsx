@@ -113,7 +113,8 @@ const VisitPlace = () => {
     setLoading(true);
 
     try {
-      const monument = await visionService.recognizeMonument(image);
+      const language = authService.getLanguage();
+      const monument = await visionService.recognizeMonument(image, language);
       setResult({
         ...monument,
         confidence: Math.min(100, Math.max(60, Math.round(monument.confidence))),

@@ -312,6 +312,14 @@ const Album = () => {
                       {selectedMonument.location}
                     </span>
                     <span className="tag">
+                      {selectedMonument.country}
+                    </span>
+                    {selectedMonument.region && (
+                      <span className="tag">
+                        {selectedMonument.region}
+                      </span>
+                    )}
+                    <span className="tag">
                       Século {selectedMonument.century}
                     </span>
                     <span className="tag">
@@ -329,6 +337,13 @@ const Album = () => {
                     </div>
                   )}
 
+                  {selectedMonument.confidence !== undefined && (
+                    <div className="info-section">
+                      <h3>Confiança da IA</h3>
+                      <p>{selectedMonument.confidence}%</p>
+                    </div>
+                  )}
+
                   <div className="info-section">
                     <h3>Descrição</h3>
                     <p>{selectedMonument.description}</p>
@@ -338,6 +353,17 @@ const Album = () => {
                     <h3>História</h3>
                     <p>{selectedMonument.history}</p>
                   </div>
+
+                  {selectedMonument.funFacts && selectedMonument.funFacts.length > 0 && (
+                    <div className="info-section">
+                      <h3>Curiosidades</h3>
+                      <ul className="fun-facts-list">
+                        {selectedMonument.funFacts.map((fact, index) => (
+                          <li key={index}>{fact}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
                   <div className="modal-actions">
                     <IonButton

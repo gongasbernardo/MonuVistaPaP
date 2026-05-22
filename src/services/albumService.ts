@@ -25,6 +25,7 @@ export interface AlbumMonument {
   visited: boolean;
   visitDate: string | null;
   visitInfo: VisitInfo;
+  confidence?: number;
   createdAt: string;
   addedAt: string;
 }
@@ -50,6 +51,7 @@ function mapMonument(m: any): AlbumMonument {
     id: m._id,
     folderId: fid,
     addedAt: m.createdAt,
+    confidence: m.confidence,
     visitInfo: {
       visited: m.visited,
       date: m.visitDate || undefined,
