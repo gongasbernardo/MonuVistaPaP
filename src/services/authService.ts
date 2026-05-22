@@ -31,45 +31,72 @@ export interface AuthResponse {
 
 class AuthService {
   async login(data: LoginData): Promise<AuthResponse> {
-    const response = await axios.post(`${API_URL}/login`, data);
-    const token = response.data.token || response.data.accessToken;
-    const user: User | undefined = {
-      ...(response.data.user || response.data.data?.user || {}),
-      language: response.data.user?.language || response.data.data?.user?.language,
-    };
+    try {
+      console.log('AuthService: Starting login request');
+      const response = await axios.post(`${API_URL}/login`, data, { timeout: 30000 });
+      console.log('AuthService: Login response received:', response.data);
+      
+      const token = response.data.token || response.data.accessToken;
+      const user: User | undefined = {
+        ...(response.data.user || response.data.data?.user || {}),
+        language: response.data.user?.language || response.data.data?.user?.language,
+      };
 
-    if (token) {
-      localStorage.setItem('token', token);
+      if (token) {
+        localStorage.setItem('token', token);
+      }
+
+      if (user && Object.keys(user).length > 0) {
+        localStorage.setItem('user', JSON.stringify(user));
+      }
+
+      console.log('AuthService: Login successful');
+      return { ...response.data, token, user };
+    } catch (error: any) {
+      console.error('AuthService: Login error:', error);
+      throw error;
     }
-
-    if (user && Object.keys(user).length > 0) {
-      localStorage.setItem('user', JSON.stringify(user));
-    }
-
-    return { ...response.data, token, user };
   }
 
   async register(data: RegisterData): Promise<AuthResponse> {
-    const response = await axios.post(`${API_URL}/register`, data);
-    const token = response.data.token || response.data.accessToken;
-    const user: User = {
-      ...(response.data.user || response.data.data?.user || {}),
-      language: response.data.user?.language || response.data.data?.user?.language || data.language,
-    };
+    try {
+      console.log('[AuthService] Starting register request to', `${API_URL}/register`);
+      const response = await axios.post(`${API_URL}/register`, data, { timeout: 30000 });
+      console.log('[AuthService] Register response received, status:', response.status);
+      console.log('[AuthService] Response data:', response.data);
+      
+      const token = response.data.token || response.data.accessToken;
+      const user: User = {
+        ...(response.data.user || response.data.data?.user || {}),
+        language: response.data.user?.language || response.data.data?.user?.language || data.language,
+      };
 
-    if (token) {
-      localStorage.setItem('token', token);
+      console.log('[AuthService] Extracted token:', !!token);
+      console.log('[AuthService] Extracted user:', user);
+
+      if (token) {
+        localStorage.setItem('token', token);
+        console.log('[AuthService] Token stored in localStorage');
+      }
+
+      if (user && Object.keys(user).length > 0) {
+        localStorage.setItem('user', JSON.stringify(user));
+        console.log('[AuthService] User stored in localStorage');
+      }
+
+      if (data.language) {
+        localStorage.setItem('language', data.language);
+        console.log('[AuthService] Language stored in localStorage');
+      }
+
+      const result = { ...response.data, token, user };
+      console.log('[AuthService] Register successful, returning:', result);
+      return result;
+    } catch (error: any) {
+      console.error('[AuthService] Register error:', error);
+      console.error('[AuthService] Error response:', error?.response?.data);
+      throw error;
     }
-
-    if (user && Object.keys(user).length > 0) {
-      localStorage.setItem('user', JSON.stringify(user));
-    }
-
-    if (data.language) {
-      localStorage.setItem('language', data.language);
-    }
-
-    return { ...response.data, token, user };
   }
 
   async forgotPassword(email: string): Promise<AuthResponse> {

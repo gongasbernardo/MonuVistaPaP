@@ -99,20 +99,50 @@ const Register: React.FC = () => {
     setLoading(true);
 
     try {
+      console.log('[Register] Starting registration with:', { email, name, language });
       const response = await authService.register({ name, email, password, language });
-      if (response.success || response.token || response.user) {
+      console.log('[Register] Response received:', response);
+      console.log('[Register] Response structure:', {
+        hasSuccess: 'success' in response,
+        hasToken: 'token' in response,
+        hasUser: 'user' in response,
+        successValue: response?.success,
+        tokenValue: !!response?.token,
+        userValue: !!response?.user,
+      });
+
+      // Check if registration was successful
+      if (response && (response.success || response.token || response.user)) {
+        console.log('[Register] ✅ Registration successful!');
         authService.setLanguage(language);
-        if (response.token) {
-          history.push('/home');
-        } else {
-          history.push('/login');
-        }
+        
+        // If we have a token, go to home; otherwise go to login
+        setTimeout(() => {
+          if (response.token) {
+            console.log('[Register] Navigating to /home with token');
+            history.push('/home');
+          } else {
+            console.log('[Register] Navigating to /login (no token)');
+            history.push('/login');
+          }
+        }, 500);
       } else {
-        setError(response.message || t.errorSubmit);
+        console.error('[Register] ❌ Unexpected response format:', response);
+        const errorMessage = response?.message || t.errorSubmit;
+        setError(errorMessage);
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || t.errorSubmit);
+      console.error('[Register] ❌ Error caught:', err);
+      console.error('[Register] Error details:', {
+        status: err?.response?.status,
+        statusText: err?.response?.statusText,
+        message: err?.message,
+        responseData: err?.response?.data,
+      });
+      const errorMsg = err?.response?.data?.message || err?.message || t.errorSubmit;
+      setError(errorMsg);
     } finally {
+      console.log('[Register] Finally block - setting loading to false');
       setLoading(false);
     }
   };
