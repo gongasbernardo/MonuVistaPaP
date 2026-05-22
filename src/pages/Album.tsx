@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   IonPage,
   IonHeader,
@@ -29,6 +29,7 @@ import albumService, { AlbumMonument, Folder } from "../services/albumService";
 import "./Album.css";
 
 const Album = () => {
+  const modalRef = useRef<any>(null);
   const [monuments, setMonuments] = useState<AlbumMonument[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [selectedFolder, setSelectedFolder] = useState<string>("all");
@@ -44,6 +45,18 @@ const Album = () => {
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    console.log('[Album] showMonumentModal changed:', showMonumentModal);
+    console.log('[Album] selectedMonument:', selectedMonument);
+    
+    // Se modal deve abrir e temos um monumento selecionado, apresentar o modal
+    if (showMonumentModal && selectedMonument && modalRef.current) {
+      console.log('[Album] Calling modal.present()');
+      modalRef.current?.present?.();
+    }
+  }, [showMonumentModal, selectedMonument]);
+
 
   const loadData = async () => {
     try {
@@ -142,6 +155,23 @@ const Album = () => {
           </div>
         </div>
 
+        {/* DEBUG BUTTON */}
+        {filteredMonuments.length > 0 && (
+          <div style={{ padding: '10px', marginBottom: '10px' }}>
+            <IonButton 
+              expand="block" 
+              color="warning"
+              onClick={() => {
+                console.log('[DEBUG] Opening test modal with first monument');
+                setSelectedMonument(filteredMonuments[0]);
+                setShowMonumentModal(true);
+              }}
+            >
+              🧪 Testar Modal (Primeiro Monumento)
+            </IonButton>
+          </div>
+        )}
+
         {/* Folder Tabs */}
         <div className="folder-tabs">
           <div className="tabs-scroll">
@@ -204,9 +234,12 @@ const Album = () => {
               key={monument.id}
               className="monument-card"
               onClick={() => {
+                console.log('[Album] Clicked monument:', monument);
                 setSelectedMonument(monument);
                 setShowMonumentModal(true);
+                console.log('[Album] Modal state updated');
               }}
+              style={{ cursor: 'pointer' }}
             >
               <div className="monument-image">
                 <img src={monument.image} alt={monument.name} />
@@ -280,11 +313,134 @@ const Album = () => {
           </div>
         )}
 
-        {/* Modal de Detalhes */}
+        {/* Modal de Detalhes - Custom Overlay */}
+        {showMonumentModal && selectedMonument && (
+          <div className="monument-modal-overlay" onClick={() => setShowMonumentModal(false)}>
+            <div className="monument-modal-content" onClick={e => e.stopPropagation()}>
+              <button className="monument-modal-close" onClick={() => setShowMonumentModal(false)}>
+                ✕
+              </button>
+              
+              <img src={selectedMonument.image} alt={selectedMonument.name} className="monument-modal-image" />
+              
+              <div className="monument-modal-body">
+                <h1>{selectedMonument.name}</h1>
+                
+                <div className="monument-modal-tags">
+                  <span className="tag">
+                    <IonIcon icon={locationOutline} />
+                    {selectedMonument.location}
+                  </span>
+                  <span className="tag">
+                    {selectedMonument.country}
+                  </span>
+                  {selectedMonument.region && (
+                    <span className="tag">
+                      {selectedMonument.region}
+                    </span>
+                  )}
+                  <span className="tag">
+                    Século {selectedMonument.century}
+                  </span>
+                  <span className="tag">
+                    {selectedMonument.style}
+                  </span>
+                </div>
+
+                {selectedMonument.visitInfo.visited && (
+                  <div className="monument-visit-info-card">
+                    <IonIcon icon={checkmarkCircleOutline} />
+                    <div>
+                      <strong>Visitado</strong>
+                      <p>{formatVisitDate(selectedMonument)}</p>
+                    </div>
+                  </div>
+                )}
+
+                {selectedMonument.confidence !== undefined && (
+                  <div className="monument-info-section">
+                    <h3>Confiança da IA</h3>
+                    <p>{selectedMonument.confidence}%</p>
+                  </div>
+                )}
+
+                <div className="monument-info-section">
+                  <h3>Descrição</h3>
+                  <p>{selectedMonument.description}</p>
+                </div>
+
+                <div className="monument-info-section">
+                  <h3>História</h3>
+                  <p>{selectedMonument.history}</p>
+                </div>
+
+                {selectedMonument.funFacts && selectedMonument.funFacts.length > 0 && (
+                  <div className="monument-info-section">
+                    <h3>Curiosidades</h3>
+                    <ul className="monument-fun-facts-list">
+                      {selectedMonument.funFacts.map((fact, index) => (
+                        <li key={index}>{fact}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <div className="monument-modal-actions">
+                  <IonButton
+                    expand="block"
+                    color={selectedMonument.visitInfo.visited ? "warning" : "success"}
+                    onClick={() => {
+                      handleToggleVisited(selectedMonument.id, selectedMonument.visitInfo.visited);
+                      setSelectedMonument({
+                        ...selectedMonument,
+                        visitInfo: {
+                          ...selectedMonument.visitInfo,
+                          visited: !selectedMonument.visitInfo.visited,
+                        },
+                      });
+                    }}
+                  >
+                    <IonIcon
+                      icon={selectedMonument.visitInfo.visited ? timeOutline : checkmarkCircleOutline}
+                      slot="start"
+                    />
+                    {selectedMonument.visitInfo.visited ? "Marcar como Por Visitar" : "Marcar como Visitado"}
+                  </IonButton>
+
+                  <IonButton
+                    expand="block"
+                    fill="outline"
+                    onClick={() => setShowActionSheet(true)}
+                  >
+                    <IonIcon icon={createOutline} slot="start" />
+                    Mover para Pasta
+                  </IonButton>
+
+                  <IonButton
+                    expand="block"
+                    color="danger"
+                    fill="outline"
+                    onClick={() => handleDeleteMonument(selectedMonument.id)}
+                  >
+                    <IonIcon icon={trashOutline} slot="start" />
+                    Eliminar
+                  </IonButton>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Ionic - Remover ou manter como fallback */}
         <IonModal
+          ref={modalRef}
           isOpen={showMonumentModal}
-          onDidDismiss={() => setShowMonumentModal(false)}
+          onDidDismiss={() => {
+            console.log('[Album] Modal dismissed');
+            setShowMonumentModal(false);
+          }}
           className="monument-modal"
+          swipeToClose={true}
         >
           {selectedMonument && (
             <IonPage>
