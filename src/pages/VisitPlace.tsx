@@ -20,6 +20,7 @@ import {
 } from "ionicons/icons";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import albumService, { Folder } from "../services/albumService";
+import authService from "../services/authService";
 import challengeService from "../services/challengeService";
 import visionService from "../services/visionService";
 import "./VisitPlace.css";
